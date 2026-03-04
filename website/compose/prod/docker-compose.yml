@@ -1,0 +1,14 @@
+services:
+  website:
+    build:
+      context: ../../
+      dockerfile: services/website/Dockerfile
+    image: sv_bahrdorf/website:prod
+    container_name: sv_bahrdorf_website
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7090:80"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

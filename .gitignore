@@ -1,0 +1,33 @@
+# Node
+node_modules/
+src/node_modules/
+
+# Build output (produced inside Docker — not committed)
+src/dist/
+dist/
+
+# Secrets / env files
+*.env
+*.env.*
+secrets/
+**/secrets/
+
+# Logs
+logs/
+*.log
+
+# Vite cache
+src/.vite/
+.vite/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Pretix data
+pretix/data/
