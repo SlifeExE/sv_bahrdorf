@@ -1,4 +1,3 @@
-cat > /opt/sv_bahrdorf/README.md << 'EOF'
 # SV Bahrdorf – Webinfrastruktur
 
 Dieses Repository enthält die komplette Webinfrastruktur für das Schützenfest Bahrdorf.
@@ -53,4 +52,3 @@ make status       # Container-Status
 - Docker & Docker Compose
 - Nginx (Host)
 - Certbot
-EOF
