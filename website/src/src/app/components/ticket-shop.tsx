@@ -1,8 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Minus, Plus, ShoppingCart, Ticket, Star, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Ticket,
+  Star,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 
-/* ── Ticket types matching Pretix widget structure ── */
+/* ── Pretix Config ── */
+const PRETIX_BASE_URL = "https://tickets.svbahrdorf.de";
+const PRETIX_ORGANIZER = "svbahrdorf";
+const PRETIX_EVENT = "tickets";
+const PRETIX_API_TOKEN =
+  import.meta.env.VITE_PRETIX_API_TOKEN ?? "";
+
+/* ── Ticket types ── */
 interface TicketType {
   id: string;
   name: string;
@@ -10,15 +30,13 @@ interface TicketType {
   dateShort: string;
   weekday: string;
   description: string;
-  price: number;
+  price: number | null; // null = noch nicht geladen
   currency: string;
   available: boolean;
-  /** Pretix event slug – for future API integration */
-  pretixSlug: string;
-  /** Pretix item ID – for future API integration */
   pretixItemId: number;
   features: string[];
   timeInfo: string;
+  startTime?: string;
   maxPerOrder: number;
 }
 
@@ -29,19 +47,19 @@ const TICKETS: TicketType[] = [
     date: "2026-09-12",
     dateShort: "12.09.2026",
     weekday: "Samstag",
-    description: "Eintritt zur großen Partynacht mit Coverband im Festzelt. Der Samstag ist DAS Highlight des Schützenfests!",
-    price: 0, // Price TBD – set to 0 as placeholder
+    description:
+      "Eintritt zur großen Partynacht mit Coverband im Festzelt. Der Samstag ist DAS Highlight des Schützenfests!",
+    price: null,
     currency: "EUR",
     available: true,
-    pretixSlug: "schuetzenfest-2026",
-    pretixItemId: 1,
+    pretixItemId: 3, // ← echte Pretix Item-ID eintragen (aus Pretix Admin → Produkte)
     features: [
       "Eintritt ins Festzelt ab 19:30 Uhr",
       "Proklamation der Majestäten",
       "Live-Musik: Coverband",
       "Party bis Open End",
     ],
-    timeInfo: "Einlass ab 19:30 Uhr",
+    timeInfo: "Ab 20:00 Uhr",
     maxPerOrder: 10,
   },
   {
@@ -50,12 +68,12 @@ const TICKETS: TicketType[] = [
     date: "2026-09-13",
     dateShort: "13.09.2026",
     weekday: "Sonntag",
-    description: "Gemütliches Katerfrühstück am Sonntagmorgen im Festzelt – der perfekte Ausklang des Schützenfest-Wochenendes.",
-    price: 0, // Price TBD
+    description:
+      "Gemütliches Katerfrühstück am Sonntagmorgen im Festzelt – der perfekte Ausklang des Schützenfest-Wochenendes.",
+    price: null,
     currency: "EUR",
     available: true,
-    pretixSlug: "schuetzenfest-2026",
-    pretixItemId: 2,
+    pretixItemId: 2, // ← echte Pretix Item-ID eintragen
     features: [
       "Reichhaltiges Frühstücksbuffet",
       "Gemütliche Atmosphäre im Festzelt",
@@ -66,87 +84,154 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/**
- * Format price for display.
- * When price is 0 (TBD), show "Preis folgt".
- */
-function formatPrice(price: number): string {
+/* ── Pretix API: Preise + Verfügbarkeit laden ── */
+async function fetchPretixItems(): Promise<Record<
+  number,
+  { price: number; available: boolean }
+> | null> {
+  // Skip API call if no token is configured
+  if (!PRETIX_API_TOKEN) return null;
+
+  const res = await fetch(
+    `${PRETIX_BASE_URL}/api/v1/organizers/${PRETIX_ORGANIZER}/events/${PRETIX_EVENT}/items/`,
+    {
+      headers: {
+        Authorization: `Token ${PRETIX_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  if (!res.ok)
+    throw new Error(`Pretix API error: ${res.status}`);
+  const data = await res.json();
+
+  const result: Record<
+    number,
+    { price: number; available: boolean }
+  > = {};
+  for (const item of data.results ?? []) {
+    result[item.id] = {
+      price: parseFloat(item.default_price),
+      available: item.active && !item.has_variations,
+    };
+  }
+  return result;
+}
+
+/* ── Checkout: Direkt in Pretix Warenkorb ── */
+function buildCheckoutUrl(
+  quantities: Record<string, number>,
+  tickets: TicketType[],
+): string {
+  const params = new URLSearchParams();
+  for (const ticket of tickets) {
+    const qty = quantities[ticket.id] ?? 0;
+    if (qty > 0) {
+      params.set(`item_${ticket.pretixItemId}`, String(qty));
+    }
+  }
+  return `${PRETIX_BASE_URL}/${PRETIX_ORGANIZER}/${PRETIX_EVENT}/cart/add?${params.toString()}`;
+}
+
+/* ── Format price ── */
+function formatPrice(price: number | null): string {
+  if (price === null) return "...";
   if (price === 0) return "Preis folgt";
   return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
-/**
- * Cart item structure – mirrors what Pretix API would expect
- */
-interface CartItem {
-  ticketId: string;
-  quantity: number;
-}
-
-/**
- * Placeholder for Pretix API integration.
- * In production, this would call:
- * POST https://pretix.eu/api/v1/organizers/{org}/events/{event}/cartpositions/
- */
-async function addToCart(_items: CartItem[]): Promise<{ success: boolean; checkoutUrl: string }> {
-  // TODO: Replace with actual Pretix API call
-  // const response = await fetch(`https://pretix.eu/api/v1/organizers/svbahrdorf/events/schuetzenfest-2026/cartpositions/`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': 'Token YOUR_PRETIX_API_TOKEN',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({ items }),
-  // });
-  return {
-    success: true,
-    checkoutUrl: "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
-  };
-}
-
+/* ════════════════════════════════════════════ */
 export function TicketShop() {
-  const [quantities, setQuantities] = useState<Record<string, number>>(
-    Object.fromEntries(TICKETS.map((t) => [t.id, 0]))
-  );
+  const [tickets, setTickets] = useState<TicketType[]>(TICKETS);
+  const [loadingPrices, setLoadingPrices] = useState(true);
+  const [quantities, setQuantities] = useState<
+    Record<string, number>
+  >(Object.fromEntries(TICKETS.map((t) => [t.id, 0])));
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(
+    null,
+  );
+
+  /* Preise beim Laden von Pretix holen */
+  useEffect(() => {
+    fetchPretixItems()
+      .then((itemData) => {
+        if (!itemData) return; // No token / no data → keep fallback prices
+        setTickets((prev) =>
+          prev.map((t) => {
+            const live = itemData[t.pretixItemId];
+            if (!live) return t;
+            return {
+              ...t,
+              price: live.price,
+              available: live.available,
+            };
+          }),
+        );
+      })
+      .catch((err) => {
+        console.info(
+          "Pretix API nicht erreichbar, zeige Fallback-Preise.",
+          err?.message,
+        );
+        // Fallback: price stays at defined default → "Preis folgt"
+      })
+      .finally(() => setLoadingPrices(false));
+  }, []);
 
   const updateQuantity = (id: string, delta: number) => {
     setQuantities((prev) => {
-      const ticket = TICKETS.find((t) => t.id === id);
+      const ticket = tickets.find((t) => t.id === id);
       const max = ticket?.maxPerOrder ?? 10;
-      const next = Math.max(0, Math.min(max, (prev[id] || 0) + delta));
+      const next = Math.max(
+        0,
+        Math.min(max, (prev[id] || 0) + delta),
+      );
       return { ...prev, [id]: next };
     });
   };
 
-  const totalItems = Object.values(quantities).reduce((a, b) => a + b, 0);
-  const totalPrice = TICKETS.reduce((sum, t) => sum + t.price * (quantities[t.id] || 0), 0);
+  const totalItems = Object.values(quantities).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  const totalPrice = tickets.reduce(
+    (sum, t) => sum + (t.price ?? 0) * (quantities[t.id] || 0),
+    0,
+  );
 
-  const handleCheckout = async () => {
-    const items: CartItem[] = TICKETS.filter((t) => (quantities[t.id] || 0) > 0).map((t) => ({
-      ticketId: t.id,
-      quantity: quantities[t.id],
-    }));
-
-    if (items.length === 0) return;
-
+  const handleCheckout = () => {
+    const hasItems = tickets.some(
+      (t) => (quantities[t.id] || 0) > 0,
+    );
+    if (!hasItems) return;
     setIsSubmitting(true);
-    try {
-      const result = await addToCart(items);
-      if (result.success) {
-        window.open(result.checkoutUrl, "_blank");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    const url = buildCheckoutUrl(quantities, tickets);
+    window.open(url, "_blank");
+    setIsSubmitting(false);
   };
 
   const faqs = [
-    { id: "age", q: "Gibt es eine Altersbeschränkung?", a: "Samstag Partynacht: Ab 16 Jahre bis 24 Uhr, ab 18 Jahre Open End. Beim Katerfrühstück gibt es keine Altersbeschränkung." },
-    { id: "payment", q: "Welche Zahlungsmethoden werden akzeptiert?", a: "Online-Zahlung per Kreditkarte, PayPal, Sofortüberweisung und Giropay. Tickets sind auch an der Abendkasse (nur Barzahlung) erhältlich." },
-    { id: "cancel", q: "Kann ich mein Ticket stornieren?", a: "Eine Stornierung ist bis 7 Tage vor der Veranstaltung möglich. Bitte kontaktiere uns unter info@svbahrdorf.de." },
-    { id: "kvv", q: "Was ist ein KVV-Ticket?", a: "KVV steht für Kartenvorverkauf. Diese Tickets sind günstiger als an der Abendkasse und sichern dir garantiert Einlass." },
+    {
+      id: "age",
+      q: "Gibt es eine Altersbeschränkung?",
+      a: "Samstag Partynacht: Ab 16 Jahre bis 24 Uhr, ab 18 Jahre Open End. Beim Katerfrühstück gibt es keine Altersbeschränkung.",
+    },
+    {
+      id: "payment",
+      q: "Welche Zahlungsmethoden werden akzeptiert?",
+      a: "Online-Zahlung per PayPal oder Überweisung. Tickets sind auch an der Abendkasse (nur Barzahlung) erhältlich.",
+    },
+    {
+      id: "cancel",
+      q: "Kann ich mein Ticket stornieren?",
+      a: "Eine Stornierung ist bis 7 Tage vor der Veranstaltung möglich. Bitte kontaktiere uns unter info@svbahrdorf.de.",
+    },
+    {
+      id: "kvv",
+      q: "Was ist ein KVV-Ticket?",
+      a: "KVV steht für Kartenvorverkauf. Diese Tickets sind günstiger als an der Abendkasse und sichern dir garantiert Einlass.",
+    },
   ];
 
   return (
@@ -154,7 +239,8 @@ export function TicketShop() {
       className="min-h-screen"
       style={{
         fontFamily: "'Nunito', sans-serif",
-        background: "linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)",
+        background:
+          "linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)",
         color: "#1a1a2e",
       }}
     >
@@ -176,7 +262,10 @@ export function TicketShop() {
             <span>Zurück zur Übersicht</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Ticket className="w-5 h-5" style={{ color: "#228B47" }} />
+            <Ticket
+              className="w-5 h-5"
+              style={{ color: "#228B47" }}
+            />
             <span
               className="tracking-wider"
               style={{
@@ -207,7 +296,8 @@ export function TicketShop() {
       <section
         className="py-12 md:py-16 text-center"
         style={{
-          background: "linear-gradient(135deg, #228B47 0%, #1a6b3c 40%, #1a4a2e 100%)",
+          background:
+            "linear-gradient(135deg, #228B47 0%, #1a6b3c 40%, #1a4a2e 100%)",
         }}
       >
         <div className="max-w-3xl mx-auto px-4">
@@ -233,11 +323,17 @@ export function TicketShop() {
           </h1>
           <p
             className="mt-3 text-white/75 max-w-lg mx-auto"
-            style={{ fontSize: "clamp(14px, 2vw, 16px)", lineHeight: 1.6 }}
+            style={{
+              fontSize: "clamp(14px, 2vw, 16px)",
+              lineHeight: 1.6,
+            }}
           >
             12. – 14. September 2026 · Festzelt am Schützenheim
           </p>
-          <div className="flex items-center justify-center gap-4 mt-4 text-white/60" style={{ fontSize: 13 }}>
+          <div
+            className="flex items-center justify-center gap-4 mt-4 text-white/60"
+            style={{ fontSize: 13 }}
+          >
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5" /> Bahrdorf
             </span>
@@ -251,23 +347,27 @@ export function TicketShop() {
       {/* ─── Ticket Cards ─── */}
       <section className="max-w-5xl mx-auto px-4 -mt-6 relative z-10 pb-12">
         <div className="grid md:grid-cols-2 gap-6">
-          {TICKETS.map((ticket) => (
+          {tickets.map((ticket) => (
             <div
               key={ticket.id}
               className="rounded-2xl overflow-hidden transition-shadow hover:shadow-xl"
               style={{
                 background: "#ffffff",
-                boxShadow: "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+                boxShadow:
+                  "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
                 border: "1px solid rgba(0,0,0,0.06)",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               {/* Card Header */}
               <div
                 className="px-6 py-5"
                 style={{
-                  background: ticket.id === "samstag-ticket"
-                    ? "linear-gradient(135deg, #e85d3a 0%, #d44a28 100%)"
-                    : "linear-gradient(135deg, #f5a623 0%, #e8951a 100%)",
+                  background:
+                    ticket.id === "samstag-ticket"
+                      ? "linear-gradient(135deg, #e85d3a 0%, #d44a28 100%)"
+                      : "linear-gradient(135deg, #f5a623 0%, #e8951a 100%)",
                 }}
               >
                 <div className="flex items-start justify-between">
@@ -294,52 +394,92 @@ export function TicketShop() {
                     style={{ fontSize: 13 }}
                   >
                     <Calendar className="w-3.5 h-3.5 text-white" />
-                    <span className="text-white">{ticket.dateShort}</span>
+                    <span className="text-white">
+                      {ticket.dateShort}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Card Body */}
-              <div className="px-6 py-5">
-                <p className="text-gray-600" style={{ fontSize: 14, lineHeight: 1.6 }}>
+              <div className="px-6 py-5 flex flex-col flex-1">
+                <p
+                  className="text-gray-600"
+                  style={{ fontSize: 14, lineHeight: 1.6 }}
+                >
                   {ticket.description}
                 </p>
 
-                {/* Features */}
                 <ul className="mt-4 space-y-2">
                   {ticket.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2" style={{ fontSize: 14 }}>
-                      <span className="mt-0.5 flex-shrink-0" style={{ color: "#228B47" }}>✓</span>
+                    <li
+                      key={i}
+                      className="flex items-start gap-2"
+                      style={{ fontSize: 14 }}
+                    >
+                      <span
+                        className="mt-0.5 flex-shrink-0"
+                        style={{ color: "#228B47" }}
+                      >
+                        ✓
+                      </span>
                       <span className="text-gray-700">{f}</span>
                     </li>
                   ))}
                 </ul>
 
-                {/* Time info */}
+                {/* Spacer to push everything below to the bottom */}
+                <div className="flex-1" />
+
                 <div
                   className="mt-4 flex items-center gap-2 text-gray-500"
                   style={{ fontSize: 13 }}
                 >
                   <Clock className="w-3.5 h-3.5" />
                   <span>{ticket.timeInfo}</span>
+                  {ticket.startTime && (
+                    <>
+                      <span className="text-gray-300">·</span>
+                      <span>{ticket.startTime}</span>
+                    </>
+                  )}
                 </div>
 
-                {/* Divider */}
-                <div className="my-5 border-t border-dashed" style={{ borderColor: "rgba(0,0,0,0.1)" }} />
+                <div
+                  className="my-5 border-t border-dashed"
+                  style={{ borderColor: "rgba(0,0,0,0.1)" }}
+                />
 
                 {/* Price & Quantity */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-gray-400 block" style={{ fontSize: 12 }}>Preis pro Ticket</span>
                     <span
-                      className="mt-0.5 block"
+                      className="text-gray-400 block"
+                      style={{ fontSize: 12 }}
+                    >
+                      Preis pro Ticket
+                    </span>
+                    <span
+                      className="mt-0.5 flex items-center gap-2"
                       style={{
-                        fontSize: ticket.price === 0 ? 16 : 24,
-                        color: ticket.price === 0 ? "#999" : "#1a1a2e",
+                        fontSize:
+                          ticket.price === null ||
+                          ticket.price === 0
+                            ? 16
+                            : 24,
+                        color:
+                          ticket.price === null ||
+                          ticket.price === 0
+                            ? "#999"
+                            : "#1a1a2e",
                         fontFamily: "'Nunito', sans-serif",
                         fontWeight: 700,
                       }}
                     >
+                      {loadingPrices &&
+                        ticket.price === null && (
+                          <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                        )}
                       {formatPrice(ticket.price)}
                     </span>
                   </div>
@@ -347,25 +487,39 @@ export function TicketShop() {
                   {/* Quantity selector */}
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => updateQuantity(ticket.id, -1)}
+                      onClick={() =>
+                        updateQuantity(ticket.id, -1)
+                      }
                       disabled={!quantities[ticket.id]}
                       className="w-9 h-9 rounded-full flex items-center justify-center transition-colors disabled:opacity-30"
                       style={{
                         border: "1.5px solid rgba(0,0,0,0.15)",
-                        background: quantities[ticket.id] ? "#fff" : "transparent",
+                        background: quantities[ticket.id]
+                          ? "#fff"
+                          : "transparent",
                       }}
                     >
                       <Minus className="w-4 h-4 text-gray-600" />
                     </button>
                     <span
                       className="w-8 text-center tabular-nums"
-                      style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: "#1a1a2e",
+                      }}
                     >
                       {quantities[ticket.id] || 0}
                     </span>
                     <button
-                      onClick={() => updateQuantity(ticket.id, 1)}
-                      disabled={!ticket.available || (quantities[ticket.id] || 0) >= ticket.maxPerOrder}
+                      onClick={() =>
+                        updateQuantity(ticket.id, 1)
+                      }
+                      disabled={
+                        !ticket.available ||
+                        (quantities[ticket.id] || 0) >=
+                          ticket.maxPerOrder
+                      }
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-30 hover:scale-105"
                       style={{ background: "#228B47" }}
                     >
@@ -384,21 +538,40 @@ export function TicketShop() {
             className="mt-8 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
             style={{
               background: "#ffffff",
-              boxShadow: "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+              boxShadow:
+                "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
               border: "1px solid rgba(0,0,0,0.06)",
             }}
           >
             <div>
-              <span className="text-gray-400" style={{ fontSize: 13 }}>Deine Auswahl</span>
+              <span
+                className="text-gray-400"
+                style={{ fontSize: 13 }}
+              >
+                Deine Auswahl
+              </span>
               <div className="flex items-baseline gap-3 mt-1">
-                {TICKETS.filter((t) => quantities[t.id] > 0).map((t) => (
-                  <span key={t.id} className="text-gray-700" style={{ fontSize: 14 }}>
-                    {quantities[t.id]}× {t.name}
-                  </span>
-                ))}
+                {tickets
+                  .filter((t) => quantities[t.id] > 0)
+                  .map((t) => (
+                    <span
+                      key={t.id}
+                      className="text-gray-700"
+                      style={{ fontSize: 14 }}
+                    >
+                      {quantities[t.id]}× {t.name}
+                    </span>
+                  ))}
               </div>
               {totalPrice > 0 && (
-                <p className="mt-1" style={{ fontSize: 20, fontWeight: 700, color: "#1a1a2e" }}>
+                <p
+                  className="mt-1"
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#1a1a2e",
+                  }}
+                >
                   Gesamt: {formatPrice(totalPrice)}
                 </p>
               )}
@@ -408,7 +581,8 @@ export function TicketShop() {
               disabled={isSubmitting}
               className="px-8 py-3 rounded-xl text-white transition-all hover:scale-105 hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
               style={{
-                background: "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
+                background:
+                  "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
                 fontSize: 15,
                 fontWeight: 600,
               }}
@@ -422,9 +596,21 @@ export function TicketShop() {
         {/* ─── Info Hinweise ─── */}
         <div className="mt-12 grid sm:grid-cols-3 gap-4">
           {[
-            { icon: <Users className="w-5 h-5" />, title: "Abendkasse", text: "Tickets auch vor Ort erhältlich (Barzahlung)" },
-            { icon: <Ticket className="w-5 h-5" />, title: "KVV-Vorteil", text: "Im Vorverkauf günstiger als an der Abendkasse" },
-            { icon: <Calendar className="w-5 h-5" />, title: "Freier Eintritt", text: "Freitag Zeltdisko & Samstag Kinderfest sind kostenlos" },
+            {
+              icon: <Users className="w-5 h-5" />,
+              title: "Abendkasse",
+              text: "Tickets auch vor Ort erhältlich (Barzahlung)",
+            },
+            {
+              icon: <Ticket className="w-5 h-5" />,
+              title: "KVV-Vorteil",
+              text: "Im Vorverkauf günstiger als an der Abendkasse",
+            },
+            {
+              icon: <Calendar className="w-5 h-5" />,
+              title: "Freier Eintritt",
+              text: "Freitag Zeltdisko & Samstag Kinderfest sind kostenlos",
+            },
           ].map((info, i) => (
             <div
               key={i}
@@ -436,13 +622,29 @@ export function TicketShop() {
             >
               <div
                 className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ background: "rgba(34,139,71,0.08)", color: "#228B47" }}
+                style={{
+                  background: "rgba(34,139,71,0.08)",
+                  color: "#228B47",
+                }}
               >
                 {info.icon}
               </div>
               <div>
-                <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>{info.title}</h4>
-                <p className="text-gray-500 mt-0.5" style={{ fontSize: 13, lineHeight: 1.5 }}>{info.text}</p>
+                <h4
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#1a1a2e",
+                  }}
+                >
+                  {info.title}
+                </h4>
+                <p
+                  className="text-gray-500 mt-0.5"
+                  style={{ fontSize: 13, lineHeight: 1.5 }}
+                >
+                  {info.text}
+                </p>
               </div>
             </div>
           ))}
@@ -471,20 +673,40 @@ export function TicketShop() {
                 }}
               >
                 <button
-                  onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                  onClick={() =>
+                    setExpandedFaq(
+                      expandedFaq === faq.id ? null : faq.id,
+                    )
+                  }
                   className="w-full px-5 py-4 flex items-center justify-between text-left"
                 >
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e" }}>{faq.q}</span>
+                  <span
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#1a1a2e",
+                    }}
+                  >
+                    {faq.q}
+                  </span>
                   <ChevronDown
                     className="w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-3"
                     style={{
-                      transform: expandedFaq === faq.id ? "rotate(180deg)" : "rotate(0deg)",
+                      transform:
+                        expandedFaq === faq.id
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
                     }}
                   />
                 </button>
                 {expandedFaq === faq.id && (
                   <div className="px-5 pb-4">
-                    <p className="text-gray-600" style={{ fontSize: 14, lineHeight: 1.7 }}>{faq.a}</p>
+                    <p
+                      className="text-gray-600"
+                      style={{ fontSize: 14, lineHeight: 1.7 }}
+                    >
+                      {faq.a}
+                    </p>
                   </div>
                 )}
               </div>
@@ -494,11 +716,24 @@ export function TicketShop() {
 
         {/* ─── Footer note ─── */}
         <div className="mt-12 text-center pb-8">
-          <p className="text-gray-400" style={{ fontSize: 12, lineHeight: 1.6 }}>
-            Veranstalter: Schützenverein Bahrdorf 1850 e.V. · Helmstedter Straße 4 · 38459 Bahrdorf
+          <p
+            className="text-gray-400"
+            style={{ fontSize: 12, lineHeight: 1.6 }}
+          >
+            Veranstalter: Schützenverein Bahrdorf 1850 e.V. ·
+            Helmstedter Straße 4 · 38459 Bahrdorf
           </p>
-          <p className="text-gray-400 mt-1" style={{ fontSize: 12 }}>
-            Bei Fragen: <a href="mailto:info@svbahrdorf.de" className="underline hover:text-gray-600">info@svbahrdorf.de</a>
+          <p
+            className="text-gray-400 mt-1"
+            style={{ fontSize: 12 }}
+          >
+            Bei Fragen:{" "}
+            <a
+              href="mailto:info@svbahrdorf.de"
+              className="underline hover:text-gray-600"
+            >
+              info@svbahrdorf.de
+            </a>
           </p>
         </div>
       </section>

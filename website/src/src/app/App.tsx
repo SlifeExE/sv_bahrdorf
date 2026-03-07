@@ -13,8 +13,12 @@ import flohmarktImg from "figma:asset/007d1b1b9854f78d0ed6f06b96bfc41f9f1d9365.p
 import bandLogoImg from "figma:asset/b7411d8102f4f0584c50d780a32d14280b0c9b56.png";
 import svLogoImg from "figma:asset/a6948e24712d25a24e428b9f548c9062c98a7718.png";
 import svLogoBadge from "figma:asset/389f347f23d75ed31a109e0cf49ef599b9018841.png";
+import tsnLogo from "figma:asset/75da564a456f2c18d5ed872e8a100b98e2e978c1.png";
+import steinreinigerLogo from "figma:asset/74c787ff6e19b674cfef44c79ac626a2d71118e4.png";
+import zilligenLogo from "figma:asset/028791d0287e0559cde433c400b1b65c27a48fce.png";
+import wronowskiLogo from "figma:asset/001dea807a73fbfb68b019cea8221cef7e7c3715.png";
+import beckmannLogo from "figma:asset/83785cb1614150ac6cba1406c52ecdd206e7955f.png";
 
-const concertImg = "https://images.unsplash.com/photo-1771865107543-3e6b77bee2e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb25jZXJ0JTIwY3Jvd2QlMjBmZXN0aXZhbCUyMG5pZ2h0JTIwbGlnaHRzfGVufDF8fHx8MTc3Mjc4NDc1Mnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
 /* ── Programm 2026 ── */
 const programm = [
@@ -36,7 +40,7 @@ const programm = [
       { zeit: "15:00", titel: "Flohmarkt Alte Turnhalle" },
       { zeit: "15:30", titel: "Kaffee & Kuchen Festzelt\n& Kinderfest/Familienfest", hinweis: "(Eintritt frei)" },
       { zeit: "19:30", titel: "Proklamation" },
-      { zeit: "20:00", titel: "Partynacht mit der Coverband", hinweis: null, sub: "(Ab 16 Jahre bis 24 Uhr, ab 18 Jahre Open End)\nKVV oder Abendkasse" },
+      { zeit: "20:00", titel: "__partynacht__", hinweis: null },
     ],
     hinweis: null,
   },
@@ -756,21 +760,21 @@ function MiniBouncy() {
 
 /* ── Sponsoren: 2 Kategorien ── */
 const hauptsponsoren = [
-  { name: "Brauerei Müller", farbe: "#2d8b6f" },
-  { name: "Autohaus Schmidt", farbe: "#2d5f8a" },
-  { name: "Sparkasse Bahrdorf", farbe: "#c41e3a" },
-  { name: "Bäckerei Krause", farbe: "#6b4c2a" },
-  { name: "Elektro Weber", farbe: "#2a6b5c" },
+  { name: "Brauerei Müller", farbe: "#2d8b6f", logo: beckmannLogo },
+  { name: "TSN Rohstoffe", farbe: "#cc0a1a", logo: tsnLogo },
+  { name: "Sparkasse Bahrdorf", farbe: "#c41e3a", logo: zilligenLogo },
+  { name: "Bäckerei Krause", farbe: "#6b4c2a", logo: wronowskiLogo },
+  { name: "Elektro Weber", farbe: "#2a6b5c", logo: steinreinigerLogo },
   { name: "Gasthof Zum Hirsch", farbe: "#8b6914" },
 ];
 
 const sponsoren = [
-  { name: "Dachdeckerei Berger", farbe: "#4a4a6a" },
-  { name: "Blumen Meier", farbe: "#7a3b5c" },
-  { name: "Friseur Schick", farbe: "#5c3b7a" },
-  { name: "Metzgerei Hoffmann", farbe: "#7a5c3b" },
+  { name: "Dachdeckerei Berger", farbe: "#4a4a6a", logo: steinreinigerLogo },
+  { name: "Blumen Meier", farbe: "#7a3b5c", logo: tsnLogo },
+  { name: "Friseur Schick", farbe: "#5c3b7a", logo: wronowskiLogo },
+  { name: "Metzgerei Hoffmann", farbe: "#7a5c3b", logo: zilligenLogo },
   { name: "Schreinerei Lang", farbe: "#3b5c7a" },
-  { name: "Apotheke am Markt", farbe: "#5c7a3b" },
+  { name: "Apotheke am Markt", farbe: "#5c7a3b", logo: beckmannLogo },
   { name: "Getränke König", farbe: "#7a3b3b" },
   { name: "Reisebüro Sonntag", farbe: "#3b7a5c" },
 ];
@@ -1033,24 +1037,30 @@ function ConfettiDots() {
 
 /* ── Sponsor-Kachel ── */
 function SponsorTile(
-  { name, farbe, size }: { name: string; farbe: string; size: "lg" | "md" }
+  { name, farbe, size, logo }: { name: string; farbe: string; size: "lg" | "md"; logo?: string }
 ) {
   const initials = name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 3);
   const isLg = size === "lg";
   return (
     <div
-      className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm flex flex-col items-center justify-center gap-1.5 p-3 transition-transform hover:scale-105"
+      className="flex flex-col items-center justify-center gap-1.5 p-3 transition-transform hover:scale-105"
       style={{ width: isLg ? 150 : 120, height: isLg ? 90 : 72 }}
     >
-      <div
-        className="rounded-lg flex items-center justify-center px-3 py-1 text-white tracking-wider"
-        style={{ backgroundColor: farbe, fontSize: isLg ? 18 : 14 }}
-      >
-        {initials}
-      </div>
-      <span className="text-center text-white/70 leading-tight" style={{ fontSize: isLg ? 10 : 9 }}>
-        {name}
-      </span>
+      {logo ? (
+        <img src={logo} alt={name} className="object-contain" style={{ maxHeight: isLg ? 300 : 150, maxWidth: isLg ? 300 : 150, filter: "drop-shadow(0 0 3px rgba(255,255,255,0.7)) drop-shadow(0 0 6px rgba(255,255,255,0.3))" }} />
+      ) : (
+        <>
+          <div
+            className="rounded-lg flex items-center justify-center px-3 py-1 text-white tracking-wider"
+            style={{ backgroundColor: farbe, fontSize: isLg ? 18 : 14 }}
+          >
+            {initials}
+          </div>
+          <span className="text-center text-white/70 leading-tight" style={{ fontSize: isLg ? 10 : 9 }}>
+            {name}
+          </span>
+        </>
+      )}
     </div>
   );
 }
@@ -1075,12 +1085,12 @@ function SponsorSidebar({
     >
       {/* Hauptsponsoren – groß */}
       {hauptItems.map((s) => (
-        <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="lg" />
+        <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="lg" logo={(s as any).logo} />
       ))}
 
       {/* Sponsoren – mittel */}
       {items.map((s) => (
-        <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="md" />
+        <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="md" logo={(s as any).logo} />
       ))}
     </div>
   );
@@ -1646,34 +1656,122 @@ export function HomePage() {
 
                     {/* Events */}
                     <div className="space-y-3 pl-2">
-                      {tag.events.map((event) => (
-                        <div key={event.zeit + event.titel}>
-                          <div className="flex items-baseline gap-3">
-                            <span
-                              className="text-white/70 shrink-0 tabular-nums"
-                              style={{ fontSize: "clamp(14px, 2.5vw, 18px)", fontFamily: "'Nunito', sans-serif", minWidth: 80 }}
+                      {tag.events.map((event) =>
+                        event.titel === "__partynacht__" ? (
+                          /* ─── Partynacht inline card ─── */
+                          <div key="partynacht" className="mt-4">
+                            <div className="flex items-baseline gap-3 mb-3">
+                              <span
+                                className="text-white/70 shrink-0 tabular-nums"
+                                style={{ fontSize: "clamp(14px, 2.5vw, 18px)", fontFamily: "'Nunito', sans-serif", minWidth: 80 }}
+                              >
+                                20:00 Uhr
+                              </span>
+                              <span
+                                className="text-white uppercase tracking-wide"
+                                style={{ fontSize: "clamp(15px, 2.5vw, 20px)", fontFamily: "'Fredoka', sans-serif" }}
+                              >
+                                Die große Partynacht
+                              </span>
+                            </div>
+                            <div
+                              className="rounded-2xl overflow-hidden ml-0 md:ml-[calc(80px+0.75rem)]"
+                              style={{
+                                background: "linear-gradient(135deg, rgba(245,197,66,0.08) 0%, rgba(139,10,46,0.1) 100%)",
+                                border: "1px solid rgba(245,197,66,0.2)",
+                              }}
                             >
-                              {event.zeit} Uhr
-                            </span>
-                            <span
-                              className="text-white uppercase tracking-wide whitespace-pre-line"
-                              style={{ fontSize: "clamp(15px, 2.5vw, 20px)", fontFamily: "'Fredoka', sans-serif" }}
-                            >
-                              {event.titel}
-                              {(event as any).hinweis && (
-                                <span className="text-accent/80 normal-case tracking-normal ml-2" style={{ fontSize: "clamp(11px, 2vw, 14px)" }}>
-                                  {(event as any).hinweis}
-                                </span>
-                              )}
-                            </span>
+                              <div className="flex flex-col sm:flex-row items-center gap-5 p-5">
+                                {/* Band Logo */}
+                                <div className="relative flex-shrink-0">
+                                  <div
+                                    className="absolute inset-0 rounded-full"
+                                    style={{
+                                      background: "radial-gradient(circle, rgba(245,197,66,0.25) 0%, transparent 70%)",
+                                      filter: "blur(14px)",
+                                      transform: "scale(1.4)",
+                                      animation: "band-glow-pulse 3s ease-in-out infinite",
+                                    }}
+                                  />
+                                  <img
+                                    src={bandLogoImg}
+                                    alt="Das Fiasko – Coverband"
+                                    className="relative w-28 h-28 md:w-36 md:h-36 object-contain"
+                                    style={{ filter: "drop-shadow(0 0 16px rgba(245,197,66,0.35)) drop-shadow(0 6px 18px rgba(0,0,0,0.4))" }}
+                                  />
+                                </div>
+                                {/* Band Info */}
+                                <div className="flex-1 text-center sm:text-left">
+                                  <span className="text-white/40 uppercase tracking-[0.2em] block mb-1" style={{ fontSize: 10 }}>
+                                    Coverband
+                                  </span>
+                                  <h4
+                                    className="mb-2"
+                                    style={{
+                                      fontSize: "clamp(22px, 3.5vw, 34px)",
+                                      fontFamily: "'Playfair Display', serif",
+                                      fontWeight: 900,
+                                      lineHeight: 1.1,
+                                      color: "#f5c542",
+                                      textShadow: "0 0 24px rgba(245,197,66,0.3)",
+                                    }}
+                                  >
+                                    Das Fiasko
+                                  </h4>
+                                  <p className="text-white/55 mb-4" style={{ fontSize: "clamp(12px, 2vw, 14px)", lineHeight: 1.6, fontFamily: "'Nunito', sans-serif" }}>
+                                    Hits aus Rock, Pop & Partyklassikern – live auf der Bühne im Festzelt. Stimmung garantiert!
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start mb-3">
+                                    {[
+                                      { icon: <Music className="w-3 h-3" />, text: "Live im Festzelt" },
+                                      { icon: <span style={{ fontSize: 12 }}>🎫</span>, text: "KVV & Abendkasse" },
+                                    ].map((d, i) => (
+                                      <span
+                                        key={i}
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white/65"
+                                        style={{ fontSize: 11, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                                      >
+                                        {d.icon}
+                                        {d.text}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <p className="text-white/30" style={{ fontSize: 11, fontFamily: "'Nunito', sans-serif" }}>
+                                    Ab 16 Jahre bis 24 Uhr · Ab 18 Jahre Open End
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          {(event as any).sub && (
-                            <p className="text-white/40 pl-[calc(80px+0.75rem)] whitespace-pre-line" style={{ fontSize: "clamp(11px, 2vw, 13px)" }}>
-                              {(event as any).sub}
-                            </p>
-                          )}
-                        </div>
-                      ))}
+                        ) : (
+                          <div key={event.zeit + event.titel}>
+                            <div className="flex items-baseline gap-3">
+                              <span
+                                className="text-white/70 shrink-0 tabular-nums"
+                                style={{ fontSize: "clamp(14px, 2.5vw, 18px)", fontFamily: "'Nunito', sans-serif", minWidth: 80 }}
+                              >
+                                {event.zeit} Uhr
+                              </span>
+                              <span
+                                className="text-white uppercase tracking-wide whitespace-pre-line"
+                                style={{ fontSize: "clamp(15px, 2.5vw, 20px)", fontFamily: "'Fredoka', sans-serif" }}
+                              >
+                                {event.titel}
+                                {(event as any).hinweis && (
+                                  <span className="text-accent/80 normal-case tracking-normal ml-2" style={{ fontSize: "clamp(11px, 2vw, 14px)" }}>
+                                    {(event as any).hinweis}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            {(event as any).sub && (
+                              <p className="text-white/40 pl-[calc(80px+0.75rem)] whitespace-pre-line" style={{ fontSize: "clamp(11px, 2vw, 13px)" }}>
+                                {(event as any).sub}
+                              </p>
+                            )}
+                          </div>
+                        )
+                      )}
                     </div>
 
                     {/* Hinweis am Tag-Ende */}
@@ -1688,165 +1786,6 @@ export function HomePage() {
             </div>
           </section>
 
-          {/* ─── Partynacht Section ─── */}
-          <section className="relative overflow-hidden py-16 md:py-24" style={{ background: "linear-gradient(180deg, #0a0a1a 0%, #1a0a2e 30%, #2a0a3e 60%, #1a0a2e 100%)" }}>
-            {/* Background concert image with heavy overlay */}
-            <div className="absolute inset-0">
-              <ImageWithFallback src={concertImg} alt="Konzert" className="w-full h-full object-cover" style={{ opacity: 0.2 }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,10,26,0.8) 0%, rgba(26,10,46,0.5) 50%, rgba(10,10,26,0.9) 100%)" }} />
-            </div>
-
-            {/* Animated stage lights */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {[
-                { left: "10%", color: "#e85d3a", delay: "0s", dur: "4s" },
-                { left: "30%", color: "#d4437a", delay: "0.8s", dur: "3.5s" },
-                { left: "50%", color: "#f5c542", delay: "1.6s", dur: "4.5s" },
-                { left: "70%", color: "#3a7be8", delay: "0.4s", dur: "3.8s" },
-                { left: "90%", color: "#2d8b6f", delay: "1.2s", dur: "4.2s" },
-              ].map((light, i) => (
-                <div
-                  key={`light${i}`}
-                  className="absolute top-0"
-                  style={{
-                    left: light.left,
-                    width: 4,
-                    height: "40%",
-                    background: `linear-gradient(180deg, ${light.color}88 0%, transparent 100%)`,
-                    filter: `blur(20px)`,
-                    transformOrigin: "top center",
-                    animation: `stage-light ${light.dur} ${light.delay} ease-in-out infinite`,
-                    opacity: 0.5,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="relative z-10 max-w-4xl mx-auto px-4">
-              <div className="flex flex-col items-center text-center">
-                {/* Overline */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-px w-10 bg-accent/50" />
-                  <span className="text-accent/80 uppercase tracking-[0.25em]" style={{ fontSize: 11, fontFamily: "'Nunito', sans-serif" }}>
-                    Samstag · 13.09.2026 · ab 20:00 Uhr
-                  </span>
-                  <div className="h-px w-10 bg-accent/50" />
-                </div>
-
-                {/* Title */}
-                <h2
-                  className="text-white mb-2"
-                  style={{
-                    fontSize: "clamp(28px, 5vw, 48px)",
-                    fontFamily: "'Playfair Display', serif",
-                    fontWeight: 900,
-                    lineHeight: 1.15,
-                  }}
-                >
-                  Die große Partynacht
-                </h2>
-                <p className="text-white/50 mb-8" style={{ fontSize: "clamp(14px, 2vw, 18px)", fontFamily: "'Nunito', sans-serif" }}>
-                  Live im Festzelt Bahrdorf
-                </p>
-
-                {/* Band Logo + Info Card */}
-                <div
-                  className="relative rounded-3xl overflow-hidden w-full max-w-2xl"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    backdropFilter: "blur(12px)",
-                  }}
-                >
-                  {/* Glow behind card */}
-                  <div className="absolute -inset-4 opacity-30 pointer-events-none" style={{
-                    background: "radial-gradient(ellipse at 50% 30%, rgba(245,197,66,0.3) 0%, transparent 70%)",
-                    filter: "blur(30px)",
-                  }} />
-
-                  <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-10 p-6 md:p-10">
-                    {/* Band Logo */}
-                    <div className="relative flex-shrink-0">
-                      {/* Pulsing glow ring */}
-                      <div
-                        className="absolute inset-0 rounded-full"
-                        style={{
-                          background: "radial-gradient(circle, rgba(245,197,66,0.25) 0%, transparent 70%)",
-                          filter: "blur(16px)",
-                          transform: "scale(1.5)",
-                          animation: "band-glow-pulse 3s ease-in-out infinite",
-                        }}
-                      />
-                      <img
-                        src={bandLogoImg}
-                        alt="Das Fiasko – Coverband"
-                        className="relative w-36 h-36 md:w-48 md:h-48 object-contain drop-shadow-2xl"
-                        style={{
-                          filter: "drop-shadow(0 0 20px rgba(245,197,66,0.4)) drop-shadow(0 8px 24px rgba(0,0,0,0.5))",
-                        }}
-                      />
-                    </div>
-
-                    {/* Band Info */}
-                    <div className="flex-1 text-center md:text-left">
-                      <span className="text-white/40 uppercase tracking-[0.2em] block mb-2" style={{ fontSize: 10 }}>
-                        Coverband
-                      </span>
-                      <h3
-                        className="text-white mb-3"
-                        style={{
-                          fontSize: "clamp(26px, 4vw, 40px)",
-                          fontFamily: "'Playfair Display', serif",
-                          fontWeight: 900,
-                          lineHeight: 1.1,
-                        }}
-                      >
-                        <span style={{ color: "#f5c542", textShadow: "0 0 30px rgba(245,197,66,0.3)" }}>Das Fiasko</span>
-                      </h3>
-                      <p className="text-white/60 mb-5" style={{ fontSize: "clamp(13px, 2vw, 15px)", lineHeight: 1.7, fontFamily: "'Nunito', sans-serif" }}>
-                        Hits aus Rock, Pop & Partyklassikern – live auf der Bühne im Festzelt. Stimmung garantiert!
-                      </p>
-
-                      {/* Details */}
-                      <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                        {[
-                          { icon: <Calendar className="w-3.5 h-3.5" />, text: "Sa. 13.09." },
-                          { icon: <Clock className="w-3.5 h-3.5" />, text: "Ab 20:00 Uhr" },
-                          { icon: <Music className="w-3.5 h-3.5" />, text: "Live im Festzelt" },
-                        ].map((d, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white/70"
-                            style={{
-                              fontSize: 12,
-                              background: "rgba(255,255,255,0.06)",
-                              border: "1px solid rgba(255,255,255,0.08)",
-                            }}
-                          >
-                            {d.icon}
-                            {d.text}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Ticket hint */}
-                      <div className="mt-5 flex items-center gap-2 justify-center md:justify-start">
-                        <span className="text-accent" style={{ fontSize: 13 }}>🎫</span>
-                        <span className="text-accent/80" style={{ fontSize: 13, fontFamily: "'Nunito', sans-serif" }}>
-                          Kartenvorverkauf & Abendkasse
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Age restriction note */}
-                <p className="text-white/30 mt-6" style={{ fontSize: 12, fontFamily: "'Nunito', sans-serif" }}>
-                  Ab 16 Jahre bis 24 Uhr · Ab 18 Jahre Open End
-                </p>
-              </div>
-            </div>
-          </section>
         </div>{/* Ende Sponsor-Sidebar-Wrapper */}
       </div>
 
@@ -1869,7 +1808,7 @@ export function HomePage() {
             </div>
             <div className="flex flex-wrap justify-center gap-4">
               {hauptsponsoren.map((s) => (
-                <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="lg" />
+                <SponsorTile key={s.name} name={s.name} farbe={s.farbe} size="lg" logo={(s as any).logo} />
               ))}
             </div>
           </div>
