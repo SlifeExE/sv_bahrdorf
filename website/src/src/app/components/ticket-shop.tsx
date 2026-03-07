@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import {
   ArrowLeft,
@@ -114,6 +114,43 @@ function formatPrice(price: number | null): string {
   if (price === null) return "...";
   if (price === 0) return "Preis folgt";
   return `${price.toFixed(2).replace(".", ",")} €`;
+}
+
+/* ── Pretix Widget Container ── */
+function PretixWidgetContainer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const inject = () => {
+      container.innerHTML = "";
+      const el = document.createElement("pretix-widget");
+      el.setAttribute(
+        "event",
+        "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
+      );
+      container.appendChild(el);
+    };
+
+    // If script already loaded and defined the custom element
+    if (customElements.get("pretix-widget")) {
+      inject();
+      return;
+    }
+
+    // Wait for script to load
+    const existing = document.getElementById(
+      "pretix-widget-js",
+    ) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", inject);
+      return () => existing.removeEventListener("load", inject);
+    }
+  }, []);
+
+  return <div ref={containerRef} style={{ minHeight: 200 }} />;
 }
 
 /* ════════════════════════════════════════════ */
@@ -601,20 +638,7 @@ export function TicketShop() {
               </button>
             </div>
             <div className="p-4" style={{ background: "#fff" }}>
-              {/* @ts-ignore – pretix-widget is a custom HTML element */}
-              <pretix-widget event="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"></pretix-widget>
-              <noscript>
-                <div className="text-center p-4">
-                  <a
-                    href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-green-700 underline"
-                  >
-                    Zum Ticketshop
-                  </a>
-                </div>
-              </noscript>
+              <PretixWidgetContainer />
             </div>
           </div>
         )}
