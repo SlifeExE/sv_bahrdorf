@@ -4,6 +4,8 @@ cd /opt/sv_bahrdorf/website
 echo "=== SV Bahrdorf Website Deploy ==="
 echo "Pulling latest changes..."
 git -C /opt/sv_bahrdorf pull
+echo "Fixing figma:asset imports..."
+find /opt/sv_bahrdorf/website/src/src -name "*.tsx" -o -name "*.ts" | xargs sed -i 's|from "figma:asset/|from "../assets/|g'
 echo "Building and deploying..."
 docker compose -f compose/prod/docker-compose.yml up -d --build
 echo "Waiting for container..."
