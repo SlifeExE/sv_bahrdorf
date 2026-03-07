@@ -19,6 +19,7 @@ import {
 const PRETIX_BASE_URL = "https://tickets.svbahrdorf.de";
 const PRETIX_ORGANIZER = "svbahrdorf";
 const PRETIX_EVENT = "tickets";
+// API calls laufen über Nginx-Proxy → kein Token im Frontend nötig
 const PRETIX_PROXY_URL = "/pretix-api";
 
 /* ── Ticket types ── */
@@ -115,6 +116,30 @@ function formatPrice(price: number | null): string {
   return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
+/* ── Load Pretix Widget scripts ── */
+function usePretixWidget() {
+  useEffect(() => {
+    if (document.getElementById("pretix-widget-css")) return;
+    const link = document.createElement("link");
+    link.id = "pretix-widget-css";
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href =
+      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+
+    const script = document.createElement("script");
+    script.id = "pretix-widget-js";
+    script.type = "text/javascript";
+    script.src =
+      "https://tickets.svbahrdorf.de/widget/v2.de.js";
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+  }, []);
+}
+
 /* ════════════════════════════════════════════ */
 export function TicketShop() {
   const [tickets, setTickets] = useState<TicketType[]>(TICKETS);
@@ -122,10 +147,13 @@ export function TicketShop() {
   const [quantities, setQuantities] = useState<
     Record<string, number>
   >(Object.fromEntries(TICKETS.map((t) => [t.id, 0])));
+  const [showWidget, setShowWidget] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(
     null,
   );
+
+  usePretixWidget();
 
   /* Preise beim Laden von Pretix holen */
   useEffect(() => {
@@ -179,28 +207,12 @@ export function TicketShop() {
       (t) => (quantities[t.id] || 0) > 0,
     );
     if (!hasItems) return;
-    setIsSubmitting(true);
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = `${PRETIX_BASE_URL}/${PRETIX_ORGANIZER}/${PRETIX_EVENT}/cart/add`;
-    form.target = "_blank";
-
-    for (const ticket of tickets) {
-      const qty = quantities[ticket.id] ?? 0;
-      if (qty > 0) {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = `item_${ticket.pretixItemId}`;
-        input.value = String(qty);
-        form.appendChild(input);
-      }
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    setIsSubmitting(false);
+    setShowWidget(true);
+    setTimeout(() => {
+      document
+        .getElementById("pretix-widget-section")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   const faqs = [
@@ -581,6 +593,55 @@ export function TicketShop() {
               <ShoppingCart className="w-4 h-4" />
               {isSubmitting ? "Wird geladen..." : "Zur Kasse"}
             </button>
+          </div>
+        )}
+
+        {/* ─── Pretix Widget Checkout ─── */}
+        {showWidget && (
+          <div
+            id="pretix-widget-section"
+            className="mt-8 rounded-2xl overflow-hidden"
+            style={{
+              border: "1px solid rgba(0,0,0,0.06)",
+              boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
+            }}
+          >
+            <div
+              className="px-6 py-4 flex items-center justify-between"
+              style={{
+                background:
+                  "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
+              }}
+            >
+              <span
+                className="text-white font-semibold"
+                style={{ fontSize: 16 }}
+              >
+                🎟️ Tickets kaufen
+              </span>
+              <button
+                onClick={() => setShowWidget(false)}
+                className="text-white/70 hover:text-white text-sm"
+              >
+                ✕ Schließen
+              </button>
+            </div>
+            <div className="p-4" style={{ background: "#fff" }}>
+              {/* @ts-ignore – pretix-widget is a custom HTML element */}
+              <pretix-widget event="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"></pretix-widget>
+              <noscript>
+                <div className="text-center p-4">
+                  <a
+                    href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-700 underline"
+                  >
+                    Zum Ticketshop
+                  </a>
+                </div>
+              </noscript>
+            </div>
           </div>
         )}
 

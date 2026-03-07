@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Calendar, Clock, Phone, Mail, PartyPopper, Star, Music, Beer, Users, Target, Trophy, X, Send } from "lucide-react";
+import { MapPin, Calendar, Clock, Phone, Mail, PartyPopper, Star, Music, Beer, Users, Target, Trophy, X, Send, Menu } from "lucide-react";
 import { Link, RouterProvider, createBrowserRouter } from "react-router";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Fireworks } from "./components/fireworks";
@@ -1213,6 +1213,7 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
 
 export function HomePage() {
   const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollTo = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1239,6 +1240,7 @@ export function HomePage() {
               SV Bahrdorf 1850 e.V.
             </span>
           </div>
+          {/* Desktop Nav Links */}
           <div className="hidden md:flex gap-8" style={{ fontSize: 14 }}>
             <a href="#programm" onClick={scrollTo("programm")} className="text-white/80 hover:text-accent transition-colors">Programm</a>
             <Link to="/tickets" className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
@@ -1246,7 +1248,27 @@ export function HomePage() {
             <a href="#sponsoren" onClick={scrollTo("sponsoren")} className="text-white/80 hover:text-accent transition-colors">Sponsoren</a>
             <a href="#kontakt" onClick={scrollTo("kontakt")} className="text-white/80 hover:text-accent transition-colors">Kontakt</a>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            className="md:hidden text-white/80 hover:text-accent transition-colors p-1"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-label="Menü öffnen"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/10 px-6 py-4 flex flex-col gap-4" style={{ fontSize: 15, background: "rgba(26,26,46,0.95)" }}>
+            <a href="#programm" onClick={(e) => { scrollTo("programm")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Programm</a>
+            <Link to="/tickets" onClick={() => setMobileMenuOpen(false)} className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
+            <a href="#highlights" onClick={(e) => { scrollTo("highlights")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Highlights</a>
+            <a href="#sponsoren" onClick={(e) => { scrollTo("sponsoren")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Sponsoren</a>
+            <a href="#kontakt" onClick={(e) => { scrollTo("kontakt")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Kontakt</a>
+          </div>
+        )}
       </nav>
 
       <DiscoBall />
