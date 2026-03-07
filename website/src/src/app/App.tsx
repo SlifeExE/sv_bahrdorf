@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Calendar, Clock, Phone, Mail, PartyPopper, Star, Music, Beer, Users, Target, Trophy, X, Send, Menu } from "lucide-react";
 import { Link, RouterProvider, createBrowserRouter } from "react-router";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
@@ -1928,6 +1928,31 @@ const router = createBrowserRouter([
   { path: "/tickets", Component: TicketShop },
 ]);
 
+/* ── Load Pretix Widget resources globally (on any page) ── */
+function usePretixWidget() {
+  useEffect(() => {
+    if (document.getElementById("pretix-widget-css")) return;
+    const link = document.createElement("link");
+    link.id = "pretix-widget-css";
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href =
+      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
+    link.crossOrigin = "anonymous";
+    document.head.appendChild(link);
+
+    const script = document.createElement("script");
+    script.id = "pretix-widget-js";
+    script.type = "text/javascript";
+    script.src =
+      "https://tickets.svbahrdorf.de/widget/v2.de.js";
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+  }, []);
+}
+
 export default function App() {
+  usePretixWidget();
   return <RouterProvider router={router} />;
 }

@@ -116,30 +116,6 @@ function formatPrice(price: number | null): string {
   return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
-/* ── Load Pretix Widget scripts ── */
-function usePretixWidget() {
-  useEffect(() => {
-    if (document.getElementById("pretix-widget-css")) return;
-    const link = document.createElement("link");
-    link.id = "pretix-widget-css";
-    link.rel = "stylesheet";
-    link.type = "text/css";
-    link.href =
-      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
-    link.crossOrigin = "anonymous";
-    document.head.appendChild(link);
-
-    const script = document.createElement("script");
-    script.id = "pretix-widget-js";
-    script.type = "text/javascript";
-    script.src =
-      "https://tickets.svbahrdorf.de/widget/v2.de.js";
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    document.head.appendChild(script);
-  }, []);
-}
-
 /* ════════════════════════════════════════════ */
 export function TicketShop() {
   const [tickets, setTickets] = useState<TicketType[]>(TICKETS);
@@ -152,8 +128,6 @@ export function TicketShop() {
   const [expandedFaq, setExpandedFaq] = useState<string | null>(
     null,
   );
-
-  usePretixWidget();
 
   /* Preise beim Laden von Pretix holen */
   useEffect(() => {
