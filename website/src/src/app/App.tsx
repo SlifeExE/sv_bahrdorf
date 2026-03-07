@@ -1490,7 +1490,8 @@ export function HomePage() {
 
 
 
-          <div className="relative z-10" style={{ marginTop: "-4rem" }}>
+          {/* ▼ Wimpelkette: mobil mt-4 (weiter unten), Desktop -mt-16 (wie vorher -4rem) ── Zeile ~1493 */}
+          <div className="relative z-10 -mt-11 md:-mt-15">
             <Pennants />
           </div>
           <div className="relative z-10 text-center px-4 pb-4" style={{ marginTop: "3rem" }}>
