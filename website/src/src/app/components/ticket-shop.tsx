@@ -19,8 +19,7 @@ import {
 const PRETIX_BASE_URL = "https://tickets.svbahrdorf.de";
 const PRETIX_ORGANIZER = "svbahrdorf";
 const PRETIX_EVENT = "tickets";
-const PRETIX_API_TOKEN =
-  import.meta.env.VITE_PRETIX_API_TOKEN ?? "";
+const PRETIX_PROXY_URL = "/pretix-api";
 
 /* ── Ticket types ── */
 interface TicketType {
@@ -30,7 +29,7 @@ interface TicketType {
   dateShort: string;
   weekday: string;
   description: string;
-  price: number | null; // null = noch nicht geladen
+  price: number | null;
   currency: string;
   available: boolean;
   pretixItemId: number;
@@ -52,7 +51,7 @@ const TICKETS: TicketType[] = [
     price: null,
     currency: "EUR",
     available: true,
-    pretixItemId: 3, // ← echte Pretix Item-ID eintragen (aus Pretix Admin → Produkte)
+    pretixItemId: 3,
     features: [
       "Eintritt ins Festzelt ab 19:30 Uhr",
       "Proklamation der Majestäten",
@@ -73,7 +72,7 @@ const TICKETS: TicketType[] = [
     price: null,
     currency: "EUR",
     available: true,
-    pretixItemId: 2, // ← echte Pretix Item-ID eintragen
+    pretixItemId: 2,
     features: [
       "Reichhaltiges Frühstücksbuffet",
       "Gemütliche Atmosphäre im Festzelt",
@@ -84,22 +83,13 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/* ── Pretix API: Preise + Verfügbarkeit laden ── */
+/* ── Pretix API: Preise + Verfügbarkeit laden (via Nginx-Proxy) ── */
 async function fetchPretixItems(): Promise<Record<
   number,
   { price: number; available: boolean }
 > | null> {
-  // Skip API call if no token is configured
-  if (!PRETIX_API_TOKEN) return null;
-
   const res = await fetch(
-    `${PRETIX_BASE_URL}/api/v1/organizers/${PRETIX_ORGANIZER}/events/${PRETIX_EVENT}/items/`,
-    {
-      headers: {
-        Authorization: `Token ${PRETIX_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-    },
+    `${PRETIX_PROXY_URL}/organizers/${PRETIX_ORGANIZER}/events/${PRETIX_EVENT}/items/`,
   );
   if (!res.ok)
     throw new Error(`Pretix API error: ${res.status}`);
@@ -116,21 +106,6 @@ async function fetchPretixItems(): Promise<Record<
     };
   }
   return result;
-}
-
-/* ── Checkout: Direkt in Pretix Warenkorb ── */
-function buildCheckoutUrl(
-  quantities: Record<string, number>,
-  tickets: TicketType[],
-): string {
-  const params = new URLSearchParams();
-  for (const ticket of tickets) {
-    const qty = quantities[ticket.id] ?? 0;
-    if (qty > 0) {
-      params.set(`item_${ticket.pretixItemId}`, String(qty));
-    }
-  }
-  return `${PRETIX_BASE_URL}/${PRETIX_ORGANIZER}/${PRETIX_EVENT}/cart/add?${params.toString()}`;
 }
 
 /* ── Format price ── */
@@ -156,7 +131,7 @@ export function TicketShop() {
   useEffect(() => {
     fetchPretixItems()
       .then((itemData) => {
-        if (!itemData) return; // No token / no data → keep fallback prices
+        if (!itemData) return;
         setTickets((prev) =>
           prev.map((t) => {
             const live = itemData[t.pretixItemId];
@@ -174,7 +149,6 @@ export function TicketShop() {
           "Pretix API nicht erreichbar, zeige Fallback-Preise.",
           err?.message,
         );
-        // Fallback: price stays at defined default → "Preis folgt"
       })
       .finally(() => setLoadingPrices(false));
   }, []);
@@ -206,8 +180,26 @@ export function TicketShop() {
     );
     if (!hasItems) return;
     setIsSubmitting(true);
-    const url = buildCheckoutUrl(quantities, tickets);
-    window.open(url, "_blank");
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `${PRETIX_BASE_URL}/${PRETIX_ORGANIZER}/${PRETIX_EVENT}/cart/add`;
+    form.target = "_blank";
+
+    for (const ticket of tickets) {
+      const qty = quantities[ticket.id] ?? 0;
+      if (qty > 0) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = `item_${ticket.pretixItemId}`;
+        input.value = String(qty);
+        form.appendChild(input);
+      }
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
     setIsSubmitting(false);
   };
 
@@ -428,7 +420,6 @@ export function TicketShop() {
                   ))}
                 </ul>
 
-                {/* Spacer to push everything below to the bottom */}
                 <div className="flex-1" />
 
                 <div

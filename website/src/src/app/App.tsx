@@ -1047,19 +1047,14 @@ function SponsorTile(
       style={{ width: isLg ? 150 : 120, height: isLg ? 90 : 72 }}
     >
       {logo ? (
-        <img src={logo} alt={name} className="object-contain" style={{ maxHeight: isLg ? 300 : 150, maxWidth: isLg ? 300 : 150, filter: "drop-shadow(0 0 3px rgba(255,255,255,0.7)) drop-shadow(0 0 6px rgba(255,255,255,0.3))" }} />
+        <img src={logo} alt={name} className="object-contain" style={{ maxHeight: isLg ? 70 : 50, maxWidth: isLg ? 130 : 100, filter: "drop-shadow(0 0 3px rgba(255,255,255,0.7)) drop-shadow(0 0 6px rgba(255,255,255,0.3))" }} />
       ) : (
-        <>
-          <div
-            className="rounded-lg flex items-center justify-center px-3 py-1 text-white tracking-wider"
-            style={{ backgroundColor: farbe, fontSize: isLg ? 18 : 14 }}
-          >
-            {initials}
-          </div>
-          <span className="text-center text-white/70 leading-tight" style={{ fontSize: isLg ? 10 : 9 }}>
-            {name}
-          </span>
-        </>
+        <div
+          className="rounded-lg flex items-center justify-center px-3 py-1 text-white tracking-wider"
+          style={{ backgroundColor: farbe, fontSize: isLg ? 18 : 14 }}
+        >
+          {initials}
+        </div>
       )}
     </div>
   );
