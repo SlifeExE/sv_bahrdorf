@@ -1928,31 +1928,29 @@ const router = createBrowserRouter([
   { path: "/tickets", Component: TicketShop },
 ]);
 
-/* ── Load Pretix Widget resources globally (on any page) ── */
-function usePretixWidget() {
-  useEffect(() => {
-    if (document.getElementById("pretix-widget-css")) return;
-    const link = document.createElement("link");
-    link.id = "pretix-widget-css";
-    link.rel = "stylesheet";
-    link.type = "text/css";
-    link.href =
-      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
-    link.crossOrigin = "anonymous";
-    document.head.appendChild(link);
-
-    const script = document.createElement("script");
-    script.id = "pretix-widget-js";
-    script.type = "text/javascript";
-    script.src =
-      "https://tickets.svbahrdorf.de/widget/v2.de.js";
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    document.head.appendChild(script);
-  }, []);
-}
-
 export default function App() {
-  usePretixWidget();
+  useEffect(() => {
+    // Pretix Widget Scripts vorladen
+    if (!document.getElementById("pretix-widget-css")) {
+      const link = document.createElement("link");
+      link.id = "pretix-widget-css";
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
+      link.crossOrigin = "anonymous";
+      document.head.appendChild(link);
+    }
+
+    if (!document.getElementById("pretix-widget-js")) {
+      const script = document.createElement("script");
+      script.id = "pretix-widget-js";
+      script.type = "text/javascript";
+      script.src = "https://tickets.svbahrdorf.de/widget/v2.de.js";
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+    }
+  }, []);
+
   return <RouterProvider router={router} />;
 }
