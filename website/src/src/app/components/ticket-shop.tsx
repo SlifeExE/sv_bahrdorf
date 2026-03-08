@@ -116,93 +116,88 @@ function formatPrice(price: number | null): string {
   return `${price.toFixed(2).replace(".", ",")} €`;
 }
 
-/* ── Pretix Widget Container ── */
-function PretixWidgetContainer() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const injectedRef = useRef(false);
+/* ── Pretix Button ── */
+/* Baut einen items-String aus den Mengen und erzeugt ein <pretix-button>-Element.
+   Klick öffnet das Pretix-Checkout-Overlay (Modal/Lightbox). */
+function PretixCheckoutButton({
+  tickets,
+  quantities,
+}: {
+  tickets: TicketType[];
+  quantities: Record<string, number>;
+}) {
+  const btnRef = useRef<HTMLDivElement>(null);
+
+  // Build items string: "item_3=2,item_2=1"
+  const itemsStr = tickets
+    .filter((t) => (quantities[t.id] || 0) > 0)
+    .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
+    .join(",");
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = btnRef.current;
     if (!container) return;
 
-    const inject = () => {
-      // Only inject once – don't destroy an already-initialized widget
-      if (injectedRef.current) return;
-      injectedRef.current = true;
+    // Clear previous button
+    container.innerHTML = "";
 
-      // Kompatibilitätsmodus: normales <div> statt Custom Element
-      const widget = document.createElement("div");
-      widget.className = "pretix-widget-compat";
-      widget.setAttribute(
-        "event",
-        "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
-      );
-      container.appendChild(widget);
-
-      // noscript fallback
-      const noscript = document.createElement("noscript");
-      noscript.innerHTML = `
-        <div class="pretix-widget">
-          <div class="pretix-widget-info-message">
-            JavaScript ist in Ihrem Browser deaktiviert. Um unseren Ticketshop ohne JavaScript aufzurufen, klicken Sie bitte
-            <a target="_blank" rel="noopener" href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/">hier</a>.
-          </div>
-        </div>
-      `;
-      container.appendChild(noscript);
-
-      // Give Pretix a moment to register, then trigger widget build
-      const tryBuild = () => {
-        if (typeof (window as any).PretixWidget !== "undefined") {
-          try {
-            (window as any).PretixWidget.buildWidgets();
-          } catch (_) {
-            // silently ignore
-          }
-        }
-      };
-      // Try immediately + with delays as fallback
-      tryBuild();
-      setTimeout(tryBuild, 200);
-      setTimeout(tryBuild, 1000);
-      setTimeout(tryBuild, 3000);
-    };
-
-    // Check if the pretix script is already in the DOM
-    const scriptEl = document.getElementById("pretix-widget-js") as HTMLScriptElement | null;
-
-    if (!scriptEl) {
-      // Script not in DOM – inject CSS + JS ourselves
-      if (!document.getElementById("pretix-widget-css")) {
-        const link = document.createElement("link");
-        link.id = "pretix-widget-css";
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
-        link.crossOrigin = "anonymous";
-        document.head.appendChild(link);
-      }
-
-      const script = document.createElement("script");
-      script.id = "pretix-widget-js";
-      script.type = "text/javascript";
-      script.src = "https://tickets.svbahrdorf.de/widget/v2.de.js";
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.onload = () => inject();
-      document.head.appendChild(script);
-      return;
+    // Create <pretix-button> element
+    const btn = document.createElement("pretix-button");
+    btn.setAttribute(
+      "event",
+      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
+    );
+    if (itemsStr) {
+      btn.setAttribute("items", itemsStr);
     }
 
-    // Script element exists – inject widget div
-    // If script already loaded, inject now; also listen for load as backup
-    inject();
-    const onLoad = () => inject();
-    scriptEl.addEventListener("load", onLoad);
-    return () => scriptEl.removeEventListener("load", onLoad);
-  }, []);
+    // Style the button content
+    const inner = document.createElement("span");
+    inner.className = "pretix-button-inner";
+    inner.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 32px;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 14px rgba(34,139,71,0.3);
+    `;
+    inner.innerHTML = `🎟️ Jetzt Tickets kaufen`;
+    inner.onmouseenter = () => {
+      inner.style.transform = "scale(1.05)";
+      inner.style.boxShadow = "0 6px 20px rgba(34,139,71,0.4)";
+    };
+    inner.onmouseleave = () => {
+      inner.style.transform = "scale(1)";
+      inner.style.boxShadow = "0 4px 14px rgba(34,139,71,0.3)";
+    };
 
-  return <div ref={containerRef} style={{ minHeight: 300 }} />;
+    btn.appendChild(inner);
+    container.appendChild(btn);
+
+    // Trigger Pretix to pick up the new button
+    const tryBuild = () => {
+      if (typeof (window as any).PretixWidget !== "undefined") {
+        try {
+          (window as any).PretixWidget.buildWidgets();
+        } catch (_) {
+          // silently ignore
+        }
+      }
+    };
+    tryBuild();
+    setTimeout(tryBuild, 300);
+    setTimeout(tryBuild, 1000);
+  }, [itemsStr]);
+
+  return <div ref={btnRef} className="inline-block" />;
 }
 
 /* ════════════════════════════════════════════ */
@@ -212,8 +207,6 @@ export function TicketShop() {
   const [quantities, setQuantities] = useState<
     Record<string, number>
   >(Object.fromEntries(TICKETS.map((t) => [t.id, 0])));
-  const [showWidget, setShowWidget] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<string | null>(
     null,
   );
@@ -270,12 +263,9 @@ export function TicketShop() {
       (t) => (quantities[t.id] || 0) > 0,
     );
     if (!hasItems) return;
-    setShowWidget(true);
-    setTimeout(() => {
-      document
-        .getElementById("pretix-widget-section")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    document
+      .getElementById("cart-summary")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   const faqs = [
@@ -608,6 +598,7 @@ export function TicketShop() {
                 "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
               border: "1px solid rgba(0,0,0,0.06)",
             }}
+            id="cart-summary"
           >
             <div>
               <span
@@ -642,56 +633,10 @@ export function TicketShop() {
                 </p>
               )}
             </div>
-            <button
-              onClick={handleCheckout}
-              disabled={isSubmitting}
-              className="px-8 py-3 rounded-xl text-white transition-all hover:scale-105 hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
-              style={{
-                background:
-                  "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
-                fontSize: 15,
-                fontWeight: 600,
-              }}
-            >
-              <ShoppingCart className="w-4 h-4" />
-              {isSubmitting ? "Wird geladen..." : "Zur Kasse"}
-            </button>
-          </div>
-        )}
-
-        {/* ─── Pretix Widget Checkout ─── */}
-        {showWidget && (
-          <div
-            id="pretix-widget-section"
-            className="mt-8 rounded-2xl overflow-hidden"
-            style={{
-              border: "1px solid rgba(0,0,0,0.06)",
-              boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
-            }}
-          >
-            <div
-              className="px-6 py-4 flex items-center justify-between"
-              style={{
-                background:
-                  "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
-              }}
-            >
-              <span
-                className="text-white font-semibold"
-                style={{ fontSize: 16 }}
-              >
-                🎟️ Tickets kaufen
-              </span>
-              <button
-                onClick={() => setShowWidget(false)}
-                className="text-white/70 hover:text-white text-sm"
-              >
-                ✕ Schließen
-              </button>
-            </div>
-            <div className="p-4" style={{ background: "#fff" }}>
-              <PretixWidgetContainer />
-            </div>
+            <PretixCheckoutButton
+              tickets={tickets}
+              quantities={quantities}
+            />
           </div>
         )}
 
