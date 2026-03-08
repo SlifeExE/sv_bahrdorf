@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:15
+    container_name: sv_bahrdorf_pretix_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pretix
+      POSTGRES_USER: pretix
+      POSTGRES_PASSWORD: ${PRETIX_DB_PASSWORD}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    networks:
+      - pretix_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "25432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: sv_bahrdorf_pretix_redis
+    restart: unless-stopped
+    networks:
+      - pretix_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pretix:
+    image: pretix/standalone:stable
+    container_name: sv_bahrdorf_pretix
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./config/pretix.cfg:/etc/pretix/pretix.cfg
+      - ./data/pretix:/data
+    ports:
+      - "127.0.0.1:7091:80"
+    networks:
+      - pretix_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  pretix_net:
+    name: sv_bahrdorf_pretix_net
+    driver: bridge
