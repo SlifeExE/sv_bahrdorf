@@ -126,75 +126,71 @@ function PretixWidgetContainer() {
     if (!container) return;
 
     const inject = () => {
-      container.innerHTML = "";
-      const el = document.createElement("pretix-widget");
-      el.setAttribute(
-        "event",
-        "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
-      );
-      container.appendChild(el);
+      // Clear & insert the pretix-widget element
+      container.innerHTML = `
+        <pretix-widget event="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"></pretix-widget>
+        <noscript>
+          <div class="pretix-widget">
+            <div class="pretix-widget-info-message">
+              JavaScript ist in Ihrem Browser deaktiviert. Um unseren Ticketshop ohne JavaScript aufzurufen, klicken Sie bitte
+              <a target="_blank" rel="noopener" href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/">hier</a>.
+            </div>
+          </div>
+        </noscript>
+      `;
       setStatus("ready");
     };
 
-    // If custom element is already registered, inject immediately
-    if (customElements.get("pretix-widget")) {
-      inject();
+    // Check if the pretix script is already loaded
+    const scriptEl = document.getElementById("pretix-widget-js") as HTMLScriptElement | null;
+
+    if (!scriptEl) {
+      // Script not even in DOM yet – inject it now
+      const link = document.createElement("link");
+      link.id = "pretix-widget-css";
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
+      link.crossOrigin = "anonymous";
+      document.head.appendChild(link);
+
+      const script = document.createElement("script");
+      script.id = "pretix-widget-js";
+      script.type = "text/javascript";
+      script.src = "https://tickets.svbahrdorf.de/widget/v2.de.js";
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = () => inject();
+      script.onerror = () => setStatus("error");
+      document.head.appendChild(script);
       return;
     }
 
-    // Poll for the custom element to become available
-    // (handles case where script already loaded but CE registration is async)
-    let attempts = 0;
-    const maxAttempts = 50; // 10 seconds max
-    const interval = setInterval(() => {
-      attempts++;
-      if (customElements.get("pretix-widget")) {
-        clearInterval(interval);
-        inject();
-        return;
-      }
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        setStatus("error");
-      }
-    }, 200);
+    // Script element exists – check if it already finished loading
+    // A loaded script has readyState "complete" or we can check via a global
+    // Try injecting immediately – if the script is loaded, Pretix will pick up the element
+    // via MutationObserver or we trigger it manually
+    inject();
 
-    // Also listen for script load event as backup
-    const scriptEl = document.getElementById(
-      "pretix-widget-js",
-    ) as HTMLScriptElement | null;
-    if (scriptEl) {
-      const onLoad = () => {
-        // Give the script a moment to register the custom element
-        setTimeout(() => {
-          if (customElements.get("pretix-widget")) {
-            clearInterval(interval);
-            inject();
-          }
-        }, 100);
-      };
-      const onError = () => {
-        clearInterval(interval);
-        setStatus("error");
-      };
-      scriptEl.addEventListener("load", onLoad);
-      scriptEl.addEventListener("error", onError);
-      return () => {
-        clearInterval(interval);
-        scriptEl.removeEventListener("load", onLoad);
-        scriptEl.removeEventListener("error", onError);
-      };
-    }
+    // If the script hasn't loaded yet, also listen for load event as backup
+    const onLoad = () => inject();
+    const onError = () => setStatus("error");
+    scriptEl.addEventListener("load", onLoad);
+    scriptEl.addEventListener("error", onError);
 
-    return () => clearInterval(interval);
+    return () => {
+      scriptEl.removeEventListener("load", onLoad);
+      scriptEl.removeEventListener("error", onError);
+    };
   }, []);
 
   return (
-    <div ref={containerRef} style={{ minHeight: 200 }}>
+    <div>
+      <div ref={containerRef} style={{ minHeight: 300 }} />
       {status === "loading" && (
         <div className="flex flex-col items-center justify-center py-12 gap-3">
           <div
-            className="w-8 h-8 rounded-full border-3 border-t-transparent animate-spin"
+            className="w-8 h-8 rounded-full border-3 animate-spin"
             style={{ borderColor: "#228B47", borderTopColor: "transparent" }}
           />
           <span className="text-sm" style={{ color: "#666" }}>
@@ -203,7 +199,7 @@ function PretixWidgetContainer() {
         </div>
       )}
       {status === "error" && (
-        <div className="flex flex-col items-center justify-center py-12 gap-3 text-center px-4">
+        <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-4">
           <span className="text-sm" style={{ color: "#666" }}>
             Der Ticketshop konnte nicht geladen werden.
           </span>
