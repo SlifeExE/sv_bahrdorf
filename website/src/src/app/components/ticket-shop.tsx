@@ -119,6 +119,7 @@ function formatPrice(price: number | null): string {
 /* ── Pretix Widget Container ── */
 function PretixWidgetContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -132,25 +133,96 @@ function PretixWidgetContainer() {
         "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
       );
       container.appendChild(el);
+      setStatus("ready");
     };
 
-    // If script already loaded and defined the custom element
+    // If custom element is already registered, inject immediately
     if (customElements.get("pretix-widget")) {
       inject();
       return;
     }
 
-    // Wait for script to load
-    const existing = document.getElementById(
+    // Poll for the custom element to become available
+    // (handles case where script already loaded but CE registration is async)
+    let attempts = 0;
+    const maxAttempts = 50; // 10 seconds max
+    const interval = setInterval(() => {
+      attempts++;
+      if (customElements.get("pretix-widget")) {
+        clearInterval(interval);
+        inject();
+        return;
+      }
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setStatus("error");
+      }
+    }, 200);
+
+    // Also listen for script load event as backup
+    const scriptEl = document.getElementById(
       "pretix-widget-js",
     ) as HTMLScriptElement | null;
-    if (existing) {
-      existing.addEventListener("load", inject);
-      return () => existing.removeEventListener("load", inject);
+    if (scriptEl) {
+      const onLoad = () => {
+        // Give the script a moment to register the custom element
+        setTimeout(() => {
+          if (customElements.get("pretix-widget")) {
+            clearInterval(interval);
+            inject();
+          }
+        }, 100);
+      };
+      const onError = () => {
+        clearInterval(interval);
+        setStatus("error");
+      };
+      scriptEl.addEventListener("load", onLoad);
+      scriptEl.addEventListener("error", onError);
+      return () => {
+        clearInterval(interval);
+        scriptEl.removeEventListener("load", onLoad);
+        scriptEl.removeEventListener("error", onError);
+      };
     }
+
+    return () => clearInterval(interval);
   }, []);
 
-  return <div ref={containerRef} style={{ minHeight: 200 }} />;
+  return (
+    <div ref={containerRef} style={{ minHeight: 200 }}>
+      {status === "loading" && (
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <div
+            className="w-8 h-8 rounded-full border-3 border-t-transparent animate-spin"
+            style={{ borderColor: "#228B47", borderTopColor: "transparent" }}
+          />
+          <span className="text-sm" style={{ color: "#666" }}>
+            Ticketshop wird geladen…
+          </span>
+        </div>
+      )}
+      {status === "error" && (
+        <div className="flex flex-col items-center justify-center py-12 gap-3 text-center px-4">
+          <span className="text-sm" style={{ color: "#666" }}>
+            Der Ticketshop konnte nicht geladen werden.
+          </span>
+          <a
+            href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-white transition-all hover:scale-105"
+            style={{
+              background: "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
+              fontSize: 14,
+            }}
+          >
+            🎟️ Ticketshop extern öffnen
+          </a>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ════════════════════════════════════════════ */
