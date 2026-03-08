@@ -119,13 +119,16 @@ function formatPrice(price: number | null): string {
 /* ── Pretix Widget Container ── */
 function PretixWidgetContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const injectedRef = useRef(false);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const inject = () => {
-      container.innerHTML = "";
+      // Only inject once – don't destroy an already-initialized widget
+      if (injectedRef.current) return;
+      injectedRef.current = true;
 
       // Kompatibilitätsmodus: normales <div> statt Custom Element
       const widget = document.createElement("div");
@@ -136,7 +139,7 @@ function PretixWidgetContainer() {
       );
       container.appendChild(widget);
 
-      // noscript fallback (won't render in JS-enabled browsers, but good practice)
+      // noscript fallback
       const noscript = document.createElement("noscript");
       noscript.innerHTML = `
         <div class="pretix-widget">
@@ -148,14 +151,21 @@ function PretixWidgetContainer() {
       `;
       container.appendChild(noscript);
 
-      // Trigger Pretix to scan for new widgets if available
-      if (typeof (window as any).PretixWidget !== "undefined") {
-        try {
-          (window as any).PretixWidget.buildWidgets();
-        } catch (_) {
-          // silently ignore
+      // Give Pretix a moment to register, then trigger widget build
+      const tryBuild = () => {
+        if (typeof (window as any).PretixWidget !== "undefined") {
+          try {
+            (window as any).PretixWidget.buildWidgets();
+          } catch (_) {
+            // silently ignore
+          }
         }
-      }
+      };
+      // Try immediately + with delays as fallback
+      tryBuild();
+      setTimeout(tryBuild, 200);
+      setTimeout(tryBuild, 1000);
+      setTimeout(tryBuild, 3000);
     };
 
     // Check if the pretix script is already in the DOM
@@ -184,11 +194,9 @@ function PretixWidgetContainer() {
       return;
     }
 
-    // Script exists – inject widget div immediately
-    // The pretix script uses MutationObserver or scans on load
+    // Script element exists – inject widget div
+    // If script already loaded, inject now; also listen for load as backup
     inject();
-
-    // Also listen for script load as backup (in case it hasn't loaded yet)
     const onLoad = () => inject();
     scriptEl.addEventListener("load", onLoad);
     return () => scriptEl.removeEventListener("load", onLoad);
