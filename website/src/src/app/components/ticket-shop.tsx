@@ -118,7 +118,8 @@ function formatPrice(price: number | null): string {
 
 /* ── Pretix Button ── */
 /* Baut einen items-String aus den Mengen und erzeugt ein <pretix-button>-Element.
-   Klick öffnet das Pretix-Checkout-Overlay (Modal/Lightbox). */
+   Klick öffnet den Pretix-Checkout in einem neuen Tab (disable-iframe wegen CORS). 
+   Falls Pretix-JS nicht geladen ist, fällt es auf einen direkten Link zurück. */
 function PretixCheckoutButton({
   tickets,
   quantities,
@@ -127,12 +128,16 @@ function PretixCheckoutButton({
   quantities: Record<string, number>;
 }) {
   const btnRef = useRef<HTMLDivElement>(null);
+  const [pretixReady, setPretixReady] = useState(false);
 
   // Build items string: "item_3=2,item_2=1"
   const itemsStr = tickets
     .filter((t) => (quantities[t.id] || 0) > 0)
     .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
     .join(",");
+
+  // Direct shop URL as fallback
+  const shopUrl = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/";
 
   useEffect(() => {
     const container = btnRef.current;
@@ -143,17 +148,16 @@ function PretixCheckoutButton({
 
     // Create <pretix-button> element
     const btn = document.createElement("pretix-button");
-    btn.setAttribute(
-      "event",
-      "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
-    );
+    btn.setAttribute("event", shopUrl);
     if (itemsStr) {
       btn.setAttribute("items", itemsStr);
     }
+    // disable-iframe: öffnet Checkout in neuem Tab statt iframe-Overlay
+    // Vermeidet CORS-Probleme komplett
+    btn.setAttribute("disable-iframe", "");
 
-    // Style the button content
+    // Inner styled content
     const inner = document.createElement("span");
-    inner.className = "pretix-button-inner";
     inner.style.cssText = `
       display: inline-flex;
       align-items: center;
@@ -169,7 +173,7 @@ function PretixCheckoutButton({
       transition: transform 0.15s, box-shadow 0.15s;
       box-shadow: 0 4px 14px rgba(34,139,71,0.3);
     `;
-    inner.innerHTML = `🎟️ Jetzt Tickets kaufen`;
+    inner.textContent = "🎟️ Jetzt Tickets kaufen";
     inner.onmouseenter = () => {
       inner.style.transform = "scale(1.05)";
       inner.style.boxShadow = "0 6px 20px rgba(34,139,71,0.4)";
@@ -187,6 +191,7 @@ function PretixCheckoutButton({
       if (typeof (window as any).PretixWidget !== "undefined") {
         try {
           (window as any).PretixWidget.buildWidgets();
+          setPretixReady(true);
         } catch (_) {
           // silently ignore
         }
@@ -195,9 +200,23 @@ function PretixCheckoutButton({
     tryBuild();
     setTimeout(tryBuild, 300);
     setTimeout(tryBuild, 1000);
-  }, [itemsStr]);
+  }, [itemsStr, shopUrl]);
 
-  return <div ref={btnRef} className="inline-block" />;
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div ref={btnRef} className="inline-block" />
+      {/* Fallback-Link falls Pretix-JS nicht lädt */}
+      <a
+        href={shopUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-gray-400 hover:text-gray-600 underline transition-colors"
+        style={{ fontSize: 12 }}
+      >
+        oder direkt zum Ticketshop →
+      </a>
+    </div>
+  );
 }
 
 /* ════════════════════════════════════════════ */
