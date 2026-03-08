@@ -119,40 +119,59 @@ function formatPrice(price: number | null): string {
 /* ── Pretix Widget Container ── */
 function PretixWidgetContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const inject = () => {
-      // Clear & insert the pretix-widget element
-      container.innerHTML = `
-        <pretix-widget event="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"></pretix-widget>
-        <noscript>
-          <div class="pretix-widget">
-            <div class="pretix-widget-info-message">
-              JavaScript ist in Ihrem Browser deaktiviert. Um unseren Ticketshop ohne JavaScript aufzurufen, klicken Sie bitte
-              <a target="_blank" rel="noopener" href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/">hier</a>.
-            </div>
+      container.innerHTML = "";
+
+      // Kompatibilitätsmodus: normales <div> statt Custom Element
+      const widget = document.createElement("div");
+      widget.className = "pretix-widget-compat";
+      widget.setAttribute(
+        "event",
+        "https://tickets.svbahrdorf.de/svbahrdorf/tickets/",
+      );
+      container.appendChild(widget);
+
+      // noscript fallback (won't render in JS-enabled browsers, but good practice)
+      const noscript = document.createElement("noscript");
+      noscript.innerHTML = `
+        <div class="pretix-widget">
+          <div class="pretix-widget-info-message">
+            JavaScript ist in Ihrem Browser deaktiviert. Um unseren Ticketshop ohne JavaScript aufzurufen, klicken Sie bitte
+            <a target="_blank" rel="noopener" href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/">hier</a>.
           </div>
-        </noscript>
+        </div>
       `;
-      setStatus("ready");
+      container.appendChild(noscript);
+
+      // Trigger Pretix to scan for new widgets if available
+      if (typeof (window as any).PretixWidget !== "undefined") {
+        try {
+          (window as any).PretixWidget.buildWidgets();
+        } catch (_) {
+          // silently ignore
+        }
+      }
     };
 
-    // Check if the pretix script is already loaded
+    // Check if the pretix script is already in the DOM
     const scriptEl = document.getElementById("pretix-widget-js") as HTMLScriptElement | null;
 
     if (!scriptEl) {
-      // Script not even in DOM yet – inject it now
-      const link = document.createElement("link");
-      link.id = "pretix-widget-css";
-      link.rel = "stylesheet";
-      link.type = "text/css";
-      link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
-      link.crossOrigin = "anonymous";
-      document.head.appendChild(link);
+      // Script not in DOM – inject CSS + JS ourselves
+      if (!document.getElementById("pretix-widget-css")) {
+        const link = document.createElement("link");
+        link.id = "pretix-widget-css";
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
+        link.crossOrigin = "anonymous";
+        document.head.appendChild(link);
+      }
 
       const script = document.createElement("script");
       script.id = "pretix-widget-js";
@@ -161,64 +180,21 @@ function PretixWidgetContainer() {
       script.async = true;
       script.crossOrigin = "anonymous";
       script.onload = () => inject();
-      script.onerror = () => setStatus("error");
       document.head.appendChild(script);
       return;
     }
 
-    // Script element exists – check if it already finished loading
-    // A loaded script has readyState "complete" or we can check via a global
-    // Try injecting immediately – if the script is loaded, Pretix will pick up the element
-    // via MutationObserver or we trigger it manually
+    // Script exists – inject widget div immediately
+    // The pretix script uses MutationObserver or scans on load
     inject();
 
-    // If the script hasn't loaded yet, also listen for load event as backup
+    // Also listen for script load as backup (in case it hasn't loaded yet)
     const onLoad = () => inject();
-    const onError = () => setStatus("error");
     scriptEl.addEventListener("load", onLoad);
-    scriptEl.addEventListener("error", onError);
-
-    return () => {
-      scriptEl.removeEventListener("load", onLoad);
-      scriptEl.removeEventListener("error", onError);
-    };
+    return () => scriptEl.removeEventListener("load", onLoad);
   }, []);
 
-  return (
-    <div>
-      <div ref={containerRef} style={{ minHeight: 300 }} />
-      {status === "loading" && (
-        <div className="flex flex-col items-center justify-center py-12 gap-3">
-          <div
-            className="w-8 h-8 rounded-full border-3 animate-spin"
-            style={{ borderColor: "#228B47", borderTopColor: "transparent" }}
-          />
-          <span className="text-sm" style={{ color: "#666" }}>
-            Ticketshop wird geladen…
-          </span>
-        </div>
-      )}
-      {status === "error" && (
-        <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-4">
-          <span className="text-sm" style={{ color: "#666" }}>
-            Der Ticketshop konnte nicht geladen werden.
-          </span>
-          <a
-            href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-white transition-all hover:scale-105"
-            style={{
-              background: "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
-              fontSize: 14,
-            }}
-          >
-            🎟️ Ticketshop extern öffnen
-          </a>
-        </div>
-      )}
-    </div>
-  );
+  return <div ref={containerRef} style={{ minHeight: 300 }} />;
 }
 
 /* ════════════════════════════════════════════ */
