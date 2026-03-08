@@ -152,9 +152,7 @@ function PretixCheckoutButton({
     if (itemsStr) {
       btn.setAttribute("items", itemsStr);
     }
-    // disable-iframe: öffnet Checkout in neuem Tab statt iframe-Overlay
-    // Vermeidet CORS-Probleme komplett
-    btn.setAttribute("disable-iframe", "");
+    // Kein disable-iframe → Pretix öffnet Checkout als Overlay/Lightbox auf der Seite
 
     // Inner styled content
     const inner = document.createElement("span");
