@@ -451,9 +451,9 @@ export function TicketShop() {
               </div>
             </div>
             <pretix-button
+              key={checkoutItemsStr}
               event={PRETIX_EVENT_URL}
               items={checkoutItemsStr}
-              className="pretix-button"
             >
               🛒 Zur Kasse ({totalItems} Ticket
               {totalItems !== 1 ? "s" : ""})
