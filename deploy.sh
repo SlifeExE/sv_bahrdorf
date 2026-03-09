@@ -18,6 +18,15 @@ git -C /opt/sv_bahrdorf reset --hard origin/main
 echo "Fixing figma:asset imports..."
 find /opt/sv_bahrdorf/website/src/src -name "*.tsx" -o -name "*.ts" | xargs sed -i 's|from "figma:asset/|from "../assets/|g'
 
+echo "Patching pretix.cfg with DB password..."
+PRETIX_DB_PASSWORD=$(grep '^PRETIX_DB_PASSWORD' /opt/sv_bahrdorf/pretix/secrets/.env | cut -d '=' -f2-)
+if [[ -z "$PRETIX_DB_PASSWORD" ]]; then
+    echo " ✗ PRETIX_DB_PASSWORD not found in secrets/.env – aborting!"
+    exit 1
+fi
+sed -i "s|^password=.*|password=${PRETIX_DB_PASSWORD}|" /opt/sv_bahrdorf/pretix/config/pretix.cfg
+echo " ✓ pretix.cfg patched"
+
 echo "Building and deploying..."
 cd /opt/sv_bahrdorf/website
 docker compose -f compose/prod/docker-compose.yml up -d --build
