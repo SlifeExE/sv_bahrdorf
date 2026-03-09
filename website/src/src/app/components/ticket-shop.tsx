@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import {
   ArrowLeft,
@@ -80,6 +80,61 @@ const TICKETS: TicketType[] = [
     maxPerOrder: 10,
   },
 ];
+
+/* ── Pretix Button Wrapper ── */
+function PretixCheckoutButton({
+  itemsStr,
+  label,
+}: {
+  itemsStr: string;
+  label: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const btn = document.createElement(
+      "pretix-button",
+    ) as HTMLElement;
+    btn.setAttribute("event", PRETIX_EVENT_URL);
+    btn.setAttribute("items", itemsStr);
+    btn.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    `;
+    btn.textContent = label;
+    btn.onmouseenter = () => {
+      btn.style.transform = "scale(1.03)";
+      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
+    };
+    btn.onmouseleave = () => {
+      btn.style.transform = "scale(1)";
+      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
+    };
+
+    container.appendChild(btn);
+  }, [itemsStr, label]);
+
+  return <div ref={containerRef} />;
+}
 
 export function TicketShop() {
   const [quantities, setQuantities] = useState<
@@ -422,19 +477,10 @@ export function TicketShop() {
               </div>
             </div>
 
-            {/*
-              key={checkoutItemsStr} zwingt React das Element komplett neu zu mounten
-              wenn sich die Auswahl ändert – Pretix initialisiert es dann frisch.
-              Laut Doku: items="item_3=2,item_2=1" direkt am Tag.
-            */}
-            <pretix-button
-              key={checkoutItemsStr}
-              event={PRETIX_EVENT_URL}
-              items={checkoutItemsStr}
-            >
-              Zur Kasse ({totalItems} Ticket
-              {totalItems !== 1 ? "s" : ""})
-            </pretix-button>
+            <PretixCheckoutButton
+              itemsStr={checkoutItemsStr}
+              label={`🛒 Zur Kasse (${totalItems} Ticket${totalItems !== 1 ? "s" : ""})`}
+            />
           </div>
         )}
 
