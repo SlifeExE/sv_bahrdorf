@@ -1315,7 +1315,7 @@ export function HomePage() {
           {/* ▼ Ganzen linken Container hoch/runter: top-Wert ändern (z.B. top: "0%") */}
           <div
             className="hidden lg:block absolute left-0 w-1/2 z-20 pointer-events-none"
-            style={{ top: "0%", bottom: 0 }}
+            style={{ top: "-5%", bottom: 0 }}
           >
             {/* ── Kaffee & Kuchen ── */}
             <div
@@ -1422,7 +1422,7 @@ export function HomePage() {
           {/* ▼ Ganzen rechten Container hoch/runter: top-Wert ändern (z.B. top: "0%") */}
           <div
             className="hidden lg:block absolute right-0 w-1/2 z-20 pointer-events-none"
-            style={{ top: "0%", bottom: 0 }}
+            style={{ top: "-5%", bottom: 0 }}
           >
             {/* ── Autoscooter ── */}
             <div
@@ -1518,7 +1518,7 @@ export function HomePage() {
 
 
           {/* ▼ Wimpelkette: mobil mt-4 (weiter unten), Desktop -mt-16 (wie vorher -4rem) ── Zeile ~1493 */}
-          <div className="relative z-10 -mt-11 md:-mt-15">
+          <div className="relative z-10 -mt-5 md:-mt-9">
             <Pennants />
           </div>
           <div className="relative z-10 text-center px-4 pb-4" style={{ marginTop: "2rem" }}>
