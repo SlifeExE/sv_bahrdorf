@@ -448,37 +448,37 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
-            {/* Unsichtbarer pretix-button – per getElementById geklickt */}
+            {/* pretix-button unsichtbar über styled button gestapelt */}
             <div
               style={{
-                position: "absolute",
-                opacity: 0,
-                pointerEvents: "none",
-                width: 0,
-                height: 0,
-                overflow: "hidden",
+                position: "relative",
+                display: "inline-flex",
               }}
             >
+              {/* Sichtbarer styled Button */}
+              <button
+                className="pretix-button"
+                style={{ pointerEvents: "none" }}
+              >
+                🛒 Zur Kasse ({totalItems} Ticket
+                {totalItems !== 1 ? "s" : ""})
+              </button>
+              {/* pretix-button liegt drüber, vollflächig, transparent */}
               <pretix-button
-                id="pretix-checkout-btn"
                 event={PRETIX_EVENT_URL}
                 items={checkoutItemsStr}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  opacity: 0,
+                  width: "100%",
+                  height: "100%",
+                  cursor: "pointer",
+                }}
               >
                 buy
               </pretix-button>
             </div>
-            <button
-              onClick={() => {
-                const btn = document.getElementById(
-                  "pretix-checkout-btn",
-                );
-                if (btn) btn.click();
-              }}
-              className="pretix-button"
-            >
-              🛒 Zur Kasse ({totalItems} Ticket
-              {totalItems !== 1 ? "s" : ""})
-            </button>
           </div>
         )}
 
