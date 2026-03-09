@@ -117,9 +117,9 @@ function formatPrice(price: number | null): string {
 }
 
 /* ── Pretix Button ── */
-/* Baut einen items-String aus den Mengen und erzeugt ein <pretix-button>-Element.
-   Klick öffnet den Pretix-Checkout in einem neuen Tab (disable-iframe wegen CORS). 
-   Falls Pretix-JS nicht geladen ist, fällt es auf einen direkten Link zurück. */
+/* Rendert ein <pretix-button>-Custom-Element mit dem items-Attribut
+   basierend auf der Nutzerauswahl. Pretix-JS (in App.tsx vorgeladen)
+   macht daraus einen funktionierenden Checkout-Button mit Overlay. */
 function PretixCheckoutButton({
   tickets,
   quantities,
@@ -128,7 +128,6 @@ function PretixCheckoutButton({
   quantities: Record<string, number>;
 }) {
   const btnRef = useRef<HTMLDivElement>(null);
-  const [pretixReady, setPretixReady] = useState(false);
 
   // Build items string: "item_3=2,item_2=1"
   const itemsStr = tickets
@@ -136,25 +135,22 @@ function PretixCheckoutButton({
     .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
     .join(",");
 
-  // Direct shop URL as fallback
   const shopUrl = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/";
 
+  // Pretix custom elements müssen per DOM erzeugt werden,
+  // damit Pretix-JS sie korrekt erkennt und initialisiert.
   useEffect(() => {
     const container = btnRef.current;
     if (!container) return;
 
-    // Clear previous button
     container.innerHTML = "";
 
-    // Create <pretix-button> element
     const btn = document.createElement("pretix-button");
     btn.setAttribute("event", shopUrl);
     if (itemsStr) {
       btn.setAttribute("items", itemsStr);
     }
-    // Kein disable-iframe → Pretix öffnet Checkout als Overlay/Lightbox auf der Seite
 
-    // Inner styled content
     const inner = document.createElement("span");
     inner.style.cssText = `
       display: inline-flex;
@@ -184,26 +180,22 @@ function PretixCheckoutButton({
     btn.appendChild(inner);
     container.appendChild(btn);
 
-    // Trigger Pretix to pick up the new button
+    // Pretix-JS auffordern, den neuen Button zu initialisieren
     const tryBuild = () => {
       if (typeof (window as any).PretixWidget !== "undefined") {
         try {
           (window as any).PretixWidget.buildWidgets();
-          setPretixReady(true);
-        } catch (_) {
-          // silently ignore
-        }
+        } catch (_) {}
       }
     };
     tryBuild();
-    setTimeout(tryBuild, 300);
-    setTimeout(tryBuild, 1000);
+    setTimeout(tryBuild, 500);
+    setTimeout(tryBuild, 1500);
   }, [itemsStr, shopUrl]);
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div ref={btnRef} className="inline-block" />
-      {/* Fallback-Link falls Pretix-JS nicht lädt */}
       <a
         href={shopUrl}
         target="_blank"

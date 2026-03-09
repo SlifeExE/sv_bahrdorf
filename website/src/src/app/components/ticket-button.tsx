@@ -1,13 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router";
 
-export function TicketButton({ href }: { href: string }) {
+export function TicketButton() {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/tickets"
       className="inline-block mt-5 no-underline group"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -128,6 +127,6 @@ export function TicketButton({ href }: { href: string }) {
           ))}
         </g>
       </svg>
-    </a>
+    </Link>
   );
 }

@@ -8,16 +8,16 @@ import { TicketButton } from "./components/ticket-button";
 import { TicketShop } from "./components/ticket-shop";
 
 const fireworksImg = "https://images.unsplash.com/photo-1657032178129-fedec8a0947a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJld29ya3MlMjBuaWdodCUyMGNlbGVicmF0aW9ufGVufDF8fHx8MTc3MjU3NTY2NHww&ixlib=rb-4.1.0&q=80&w=1080";
-import autoscooterImg from "../assets/d301daf9d2eabbc76292ef3859a540092ad41a54.png";
-import flohmarktImg from "../assets/007d1b1b9854f78d0ed6f06b96bfc41f9f1d9365.png";
-import bandLogoImg from "../assets/b7411d8102f4f0584c50d780a32d14280b0c9b56.png";
-import svLogoImg from "../assets/a6948e24712d25a24e428b9f548c9062c98a7718.png";
-import svLogoBadge from "../assets/389f347f23d75ed31a109e0cf49ef599b9018841.png";
-import tsnLogo from "../assets/75da564a456f2c18d5ed872e8a100b98e2e978c1.png";
-import steinreinigerLogo from "../assets/74c787ff6e19b674cfef44c79ac626a2d71118e4.png";
-import zilligenLogo from "../assets/028791d0287e0559cde433c400b1b65c27a48fce.png";
-import wronowskiLogo from "../assets/001dea807a73fbfb68b019cea8221cef7e7c3715.png";
-import beckmannLogo from "../assets/83785cb1614150ac6cba1406c52ecdd206e7955f.png";
+import autoscooterImg from "figma:asset/d301daf9d2eabbc76292ef3859a540092ad41a54.png";
+import flohmarktImg from "figma:asset/007d1b1b9854f78d0ed6f06b96bfc41f9f1d9365.png";
+import bandLogoImg from "figma:asset/b7411d8102f4f0584c50d780a32d14280b0c9b56.png";
+import svLogoImg from "figma:asset/a6948e24712d25a24e428b9f548c9062c98a7718.png";
+import svLogoBadge from "figma:asset/389f347f23d75ed31a109e0cf49ef599b9018841.png";
+import tsnLogo from "figma:asset/75da564a456f2c18d5ed872e8a100b98e2e978c1.png";
+import steinreinigerLogo from "figma:asset/74c787ff6e19b674cfef44c79ac626a2d71118e4.png";
+import zilligenLogo from "figma:asset/028791d0287e0559cde433c400b1b65c27a48fce.png";
+import wronowskiLogo from "figma:asset/001dea807a73fbfb68b019cea8221cef7e7c3715.png";
+import beckmannLogo from "figma:asset/83785cb1614150ac6cba1406c52ecdd206e7955f.png";
 
 
 /* ── Programm 2026 ── */
@@ -1553,7 +1553,7 @@ export function HomePage() {
               Familienfest
             </h3>
               <p className="text-accent mt-3" style={{ fontSize: 16 }}>🎉 Eintritt frei! 🎉</p>
-              <TicketButton href="https://tickets.svbahrdorf.de/svbahrdorf/tickets/" />
+              <TicketButton />
             </div>
           </div>
           <svg viewBox="0 0 1440 80" className="w-full -mb-1 relative z-10" preserveAspectRatio="none">
