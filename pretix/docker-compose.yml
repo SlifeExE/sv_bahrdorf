@@ -39,6 +39,7 @@ services:
     volumes:
       - ./config/pretix.cfg:/etc/pretix/pretix.cfg
       - ./data/pretix:/data
+      - ./custom_settings.py:/usr/local/lib/python3.11/site-packages/pretix/custom_settings.py
     ports:
       - "127.0.0.1:7091:80"
     networks:
