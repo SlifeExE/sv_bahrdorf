@@ -131,6 +131,11 @@ function PretixCheckoutButton({
     };
 
     container.appendChild(btn);
+
+    // Pretix custom element muss explizit upgegraded werden nach DOM-Insert
+    if (window.customElements) {
+      window.customElements.upgrade(btn);
+    }
   }, [itemsStr, label]);
 
   return <div ref={containerRef} />;
