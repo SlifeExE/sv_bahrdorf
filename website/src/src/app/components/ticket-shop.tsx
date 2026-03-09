@@ -154,6 +154,13 @@ export function TicketShop() {
     null,
   );
 
+  // Reset bei jedem Seitenbesuch (SPA-Navigation hält State sonst am Leben)
+  useEffect(() => {
+    setQuantities(
+      Object.fromEntries(TICKETS.map((t) => [t.id, 0])),
+    );
+  }, []);
+
   const updateQuantity = (id: string, delta: number) => {
     setQuantities((prev) => {
       const ticket = TICKETS.find((t) => t.id === id);
