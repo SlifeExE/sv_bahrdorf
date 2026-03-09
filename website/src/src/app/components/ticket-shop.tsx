@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router";
 import {
   ArrowLeft,
@@ -111,21 +111,6 @@ export function TicketShop() {
   )
     .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
     .join(",");
-
-  const handleCheckout = () => {
-    const container = document.createElement("div");
-    container.style.display = "none";
-    document.body.appendChild(container);
-    const btn = document.createElement("pretix-button");
-    btn.setAttribute("event", PRETIX_EVENT_URL);
-    btn.setAttribute("items", checkoutItemsStr);
-    container.appendChild(btn);
-    // Allow the custom element to initialize, then click
-    setTimeout(() => {
-      (btn as HTMLElement).click();
-      setTimeout(() => container.remove(), 2000);
-    }, 100);
-  };
 
   const faqs = [
     {
@@ -463,8 +448,32 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
+            {/* Unsichtbarer pretix-button – per getElementById geklickt */}
+            <div
+              style={{
+                position: "absolute",
+                opacity: 0,
+                pointerEvents: "none",
+                width: 0,
+                height: 0,
+                overflow: "hidden",
+              }}
+            >
+              <pretix-button
+                id="pretix-checkout-btn"
+                event={PRETIX_EVENT_URL}
+                items={checkoutItemsStr}
+              >
+                buy
+              </pretix-button>
+            </div>
             <button
-              onClick={handleCheckout}
+              onClick={() => {
+                const btn = document.getElementById(
+                  "pretix-checkout-btn",
+                );
+                if (btn) btn.click();
+              }}
               className="pretix-button"
             >
               🛒 Zur Kasse ({totalItems} Ticket
