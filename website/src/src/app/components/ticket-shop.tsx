@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-/* ── Pretix custom element TypeScript declaration ── */
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -82,61 +81,6 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/* ── Pretix Button Wrapper (identisch mit den funktionierenden Einzelbuttons) ── */
-function PretixCheckoutButton({
-  itemsStr,
-  label,
-}: {
-  itemsStr: string;
-  label: string;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    const btn = document.createElement(
-      "pretix-button",
-    ) as HTMLElement;
-    btn.setAttribute("event", PRETIX_EVENT_URL);
-    btn.setAttribute("items", itemsStr);
-    btn.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 32px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
-      color: white;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: 'Nunito', sans-serif;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
-      transition: transform 0.15s, box-shadow 0.15s;
-      white-space: nowrap;
-    `;
-    btn.textContent = label;
-    btn.onmouseenter = () => {
-      btn.style.transform = "scale(1.03)";
-      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
-    };
-    btn.onmouseleave = () => {
-      btn.style.transform = "scale(1)";
-      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
-    };
-
-    container.appendChild(btn);
-  }, [itemsStr, label]);
-
-  return <div ref={containerRef} />;
-}
-
 export function TicketShop() {
   const [quantities, setQuantities] = useState<
     Record<string, number>
@@ -162,6 +106,7 @@ export function TicketShop() {
     0,
   );
 
+  // e.g. "item_3=2,item_2=1"
   const checkoutItemsStr = TICKETS.filter(
     (t) => (quantities[t.id] || 0) > 0,
   )
@@ -354,7 +299,6 @@ export function TicketShop() {
                   </div>
                 </div>
               </div>
-
               {/* Card Body */}
               <div className="px-6 py-5">
                 <p
@@ -363,7 +307,6 @@ export function TicketShop() {
                 >
                   {ticket.description}
                 </p>
-
                 <ul className="mt-4 space-y-2">
                   {ticket.features.map((f, i) => (
                     <li
@@ -381,7 +324,6 @@ export function TicketShop() {
                     </li>
                   ))}
                 </ul>
-
                 <div
                   className="mt-4 flex items-center gap-2 text-gray-500"
                   style={{ fontSize: 13 }}
@@ -389,12 +331,10 @@ export function TicketShop() {
                   <Clock className="w-3.5 h-3.5" />
                   <span>{ticket.timeInfo}</span>
                 </div>
-
                 <div
                   className="my-5 border-t border-dashed"
                   style={{ borderColor: "rgba(0,0,0,0.1)" }}
                 />
-
                 {/* Quantity selector */}
                 <div className="flex items-center justify-between">
                   <span
@@ -481,10 +421,20 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
-            <PretixCheckoutButton
-              itemsStr={checkoutItemsStr}
-              label={`🛒 Zur Kasse (${totalItems} Ticket${totalItems !== 1 ? "s" : ""})`}
-            />
+
+            {/*
+              key={checkoutItemsStr} zwingt React das Element komplett neu zu mounten
+              wenn sich die Auswahl ändert – Pretix initialisiert es dann frisch.
+              Laut Doku: items="item_3=2,item_2=1" direkt am Tag.
+            */}
+            <pretix-button
+              key={checkoutItemsStr}
+              event={PRETIX_EVENT_URL}
+              items={checkoutItemsStr}
+            >
+              Zur Kasse ({totalItems} Ticket
+              {totalItems !== 1 ? "s" : ""})
+            </pretix-button>
           </div>
         )}
 
