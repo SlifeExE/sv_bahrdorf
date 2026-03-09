@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-/* ── Pretix custom element TypeScript declaration ── */
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -25,7 +24,8 @@ declare global {
         event?: string;
         items?: string;
         voucher?: string;
-        "skip-ssl-check"?: boolean;
+        "skip-ssl-check"?: string;
+        "disable-iframe"?: string;
       };
     }
   }
@@ -82,62 +82,6 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/* ── Pretix Button Wrapper ── */
-function PretixCheckoutButton({
-  itemsStr,
-  label,
-}: {
-  itemsStr: string;
-  label: string;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Remove existing button
-    container.innerHTML = "";
-
-    const btn = document.createElement(
-      "pretix-button",
-    ) as HTMLElement;
-    btn.setAttribute("event", PRETIX_EVENT_URL);
-    btn.setAttribute("items", itemsStr);
-    btn.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 32px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
-      color: white;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: 'Nunito', sans-serif;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
-      transition: transform 0.15s, box-shadow 0.15s;
-      white-space: nowrap;
-    `;
-    btn.textContent = label;
-    btn.onmouseenter = () => {
-      btn.style.transform = "scale(1.03)";
-      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
-    };
-    btn.onmouseleave = () => {
-      btn.style.transform = "scale(1)";
-      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
-    };
-
-    container.appendChild(btn);
-  }, [itemsStr, label]);
-
-  return <div ref={containerRef} />;
-}
-
 export function TicketShop() {
   const [quantities, setQuantities] = useState<
     Record<string, number>
@@ -163,7 +107,6 @@ export function TicketShop() {
     0,
   );
 
-  // Build items string for pretix-button: "item_3=2,item_2=1"
   const checkoutItemsStr = TICKETS.filter(
     (t) => (quantities[t.id] || 0) > 0,
   )
@@ -203,6 +146,33 @@ export function TicketShop() {
         color: "#1a1a2e",
       }}
     >
+      {/* ─── Pretix Button Styles ─── */}
+      <style>{`
+        .pretix-button {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          padding: 12px 32px !important;
+          border-radius: 12px !important;
+          background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%) !important;
+          color: white !important;
+          font-size: 15px !important;
+          font-weight: 600 !important;
+          font-family: 'Nunito', sans-serif !important;
+          cursor: pointer !important;
+          border: none !important;
+          box-shadow: 0 4px 20px rgba(34,139,71,0.3) !important;
+          transition: transform 0.15s, box-shadow 0.15s !important;
+          white-space: nowrap !important;
+          text-decoration: none !important;
+        }
+        .pretix-button:hover {
+          transform: scale(1.03) !important;
+          box-shadow: 0 6px 24px rgba(34,139,71,0.4) !important;
+        }
+      `}</style>
+
       {/* ─── Header ─── */}
       <header
         className="sticky top-0 z-50 backdrop-blur-md border-b"
@@ -414,9 +384,6 @@ export function TicketShop() {
                       className="w-9 h-9 rounded-full flex items-center justify-center transition-colors disabled:opacity-30"
                       style={{
                         border: "1.5px solid rgba(0,0,0,0.15)",
-                        background: quantities[ticket.id]
-                          ? "#fff"
-                          : "transparent",
                       }}
                     >
                       <Minus className="w-4 h-4 text-gray-600" />
@@ -447,26 +414,27 @@ export function TicketShop() {
                   </div>
                 </div>
 
-                {/* Per-ticket pretix-button (quantity 1) */}
-                <div className="mt-4 flex justify-center">
-                  <PretixCheckoutButton
-                    itemsStr={`item_${ticket.pretixItemId}=1`}
-                    label={`1× ${ticket.name} kaufen`}
-                  />
+                {/* Pretix Button – 1 Ticket */}
+                <div className="mt-5 flex justify-center">
+                  <pretix-button
+                    event={PRETIX_EVENT_URL}
+                    items={`item_${ticket.pretixItemId}=1`}
+                  >
+                    🎟 1× {ticket.name} kaufen
+                  </pretix-button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ─── Cart Summary / Checkout ─── */}
+        {/* ─── Warenkorb / Checkout mit gewählten Mengen ─── */}
         {totalItems > 0 && (
           <div
             className="mt-8 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
             style={{
               background: "#ffffff",
-              boxShadow:
-                "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+              boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
               border: "1px solid rgba(0,0,0,0.06)",
             }}
           >
@@ -491,10 +459,13 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
-            <PretixCheckoutButton
-              itemsStr={checkoutItemsStr}
-              label="Zur Kasse"
-            />
+            <pretix-button
+              event={PRETIX_EVENT_URL}
+              items={checkoutItemsStr}
+            >
+              🛒 Zur Kasse ({totalItems} Ticket
+              {totalItems !== 1 ? "s" : ""})
+            </pretix-button>
           </div>
         )}
 
