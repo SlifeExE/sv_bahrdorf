@@ -57,11 +57,10 @@ const TICKETS: TicketType[] = [
     pretixItemId: 3,
     features: [
       "Eintritt ins Festzelt ab 19:30 Uhr",
-      "Proklamation der Majestäten",
       "Live-Musik: Coverband Das Fiasko",
       "Party bis Open End",
     ],
-    timeInfo: "Einlass ab 19:30 Uhr",
+    timeInfo: "Beginn um 20:00 Uhr",
     maxPerOrder: 10,
   },
   {
@@ -112,6 +111,21 @@ export function TicketShop() {
   )
     .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
     .join(",");
+
+  const handleCheckout = () => {
+    const container = document.createElement("div");
+    container.style.display = "none";
+    document.body.appendChild(container);
+    const btn = document.createElement("pretix-button");
+    btn.setAttribute("event", PRETIX_EVENT_URL);
+    btn.setAttribute("items", checkoutItemsStr);
+    container.appendChild(btn);
+    // Allow the custom element to initialize, then click
+    setTimeout(() => {
+      (btn as HTMLElement).click();
+      setTimeout(() => container.remove(), 2000);
+    }, 100);
+  };
 
   const faqs = [
     {
@@ -413,16 +427,6 @@ export function TicketShop() {
                     </button>
                   </div>
                 </div>
-
-                {/* Pretix Button – 1 Ticket */}
-                <div className="mt-5 flex justify-center">
-                  <pretix-button
-                    event={PRETIX_EVENT_URL}
-                    items={`item_${ticket.pretixItemId}=1`}
-                  >
-                    🎟 1× {ticket.name} kaufen
-                  </pretix-button>
-                </div>
               </div>
             </div>
           ))}
@@ -459,13 +463,13 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
-            <pretix-button
-              event={PRETIX_EVENT_URL}
-              items={checkoutItemsStr}
+            <button
+              onClick={handleCheckout}
+              className="pretix-button"
             >
               🛒 Zur Kasse ({totalItems} Ticket
               {totalItems !== 1 ? "s" : ""})
-            </pretix-button>
+            </button>
           </div>
         )}
 
