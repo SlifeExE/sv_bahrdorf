@@ -1937,7 +1937,6 @@ export default function App() {
       link.rel = "stylesheet";
       link.type = "text/css";
       link.href = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/widget/v2.css";
-      link.crossOrigin = "anonymous";
       document.head.appendChild(link);
     }
 
@@ -1947,7 +1946,6 @@ export default function App() {
       script.type = "text/javascript";
       script.src = "https://tickets.svbahrdorf.de/widget/v2.de.js";
       script.async = true;
-      script.crossOrigin = "anonymous";
       document.head.appendChild(script);
     }
   }, []);

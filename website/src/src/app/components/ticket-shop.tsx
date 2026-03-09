@@ -91,81 +91,124 @@ function PretixCheckoutButton({
 }) {
   const btnRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [widgetReady, setWidgetReady] = useState(false);
+  const [fallback, setFallback] = useState(false);
 
+  // Script wird bereits in App.tsx global geladen (tickets.svbahrdorf.de/widget/v2.de.js)
+  // Hier nur auf die Custom-Element-Registrierung warten, mit Fallback
   useEffect(() => {
+    let attempts = 0;
     let timeoutId: ReturnType<typeof setTimeout>;
 
-    const createBtn = () => {
-      if (!containerRef.current || btnRef.current) return;
-      const btn = document.createElement(
-        "pretix-button",
-      ) as HTMLElement;
-      btn.setAttribute("event", PRETIX_EVENT_URL);
-      btn.setAttribute("items", itemsStr);
-      btn.style.cssText = `
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 32px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
-        color: white;
-        font-size: 15px;
-        font-weight: 600;
-        font-family: 'Nunito', sans-serif;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 4px 20px rgba(34,139,71,0.3);
-        transition: transform 0.15s, box-shadow 0.15s;
-        white-space: nowrap;
-      `;
-      btn.textContent = label;
-      btn.onmouseenter = () => {
-        btn.style.transform = "scale(1.03)";
-        btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
-      };
-      btn.onmouseleave = () => {
-        btn.style.transform = "scale(1)";
-        btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
-      };
-      containerRef.current.appendChild(btn);
-      btnRef.current = btn;
-    };
-
-    // Alle 100ms prüfen ob pretix-button registriert ist (max 10s)
-    let attempts = 0;
     const poll = () => {
-      const defined = customElements.get("pretix-button");
-      console.log(
-        `[PretixBtn] attempt ${attempts}: defined=${!!defined}, container=${!!containerRef.current}, btnRef=${!!btnRef.current}`,
-      );
-      if (defined) {
-        createBtn();
-        console.log(
-          "[PretixBtn] createBtn called, btnRef=",
-          btnRef.current,
-        );
+      if (customElements.get("pretix-button")) {
+        setWidgetReady(true);
       } else if (attempts++ < 100) {
         timeoutId = setTimeout(poll, 100);
       } else {
         console.warn(
-          "[PretixBtn] gave up after 10s – pretix-button never registered",
+          "[PretixBtn] widget script did not register – using fallback link",
         );
+        setFallback(true);
       }
     };
     poll();
-
     return () => clearTimeout(timeoutId);
-  }, []); // nur einmal beim Mount
+  }, []);
 
-  // items + label nur per setAttribute updaten – kein neu-Erstellen
+  // 3) Create the custom element once widget is ready
+  useEffect(() => {
+    if (!widgetReady || !containerRef.current || btnRef.current) return;
+    const btn = document.createElement("pretix-button") as HTMLElement;
+    btn.setAttribute("event", PRETIX_EVENT_URL);
+    btn.setAttribute("items", itemsStr);
+    btn.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    `;
+    btn.textContent = label;
+    btn.onmouseenter = () => {
+      btn.style.transform = "scale(1.03)";
+      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
+    };
+    btn.onmouseleave = () => {
+      btn.style.transform = "scale(1)";
+      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
+    };
+    containerRef.current.appendChild(btn);
+    btnRef.current = btn;
+  }, [widgetReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 4) Update attributes when items/label change
   useEffect(() => {
     if (btnRef.current) {
       btnRef.current.setAttribute("items", itemsStr);
       btnRef.current.textContent = label;
     }
   }, [itemsStr, label]);
+
+  // 5) Fallback: direct link to pretix shop
+  const handleFallbackClick = () => {
+    const url = new URL(PRETIX_EVENT_URL);
+    // Append items as query params for pretix cart
+    itemsStr.split(",").forEach((entry) => {
+      const [key, val] = entry.split("=");
+      if (key && val) url.searchParams.set(key, val);
+    });
+    window.open(url.toString(), "_blank", "noopener");
+  };
+
+  if (fallback) {
+    return (
+      <button
+        onClick={handleFallbackClick}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          padding: "12px 32px",
+          borderRadius: 12,
+          background: "linear-gradient(135deg, #228B47 0%, #1a6b3c 100%)",
+          color: "white",
+          fontSize: 15,
+          fontWeight: 600,
+          fontFamily: "'Nunito', sans-serif",
+          cursor: "pointer",
+          border: "none",
+          boxShadow: "0 4px 20px rgba(34,139,71,0.3)",
+          transition: "transform 0.15s, box-shadow 0.15s",
+          whiteSpace: "nowrap",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "scale(1.03)";
+          e.currentTarget.style.boxShadow =
+            "0 6px 24px rgba(34,139,71,0.4)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.boxShadow =
+            "0 4px 20px rgba(34,139,71,0.3)";
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
 
   return <div ref={containerRef} />;
 }
@@ -630,7 +673,6 @@ export function TicketShop() {
                     }}
                   />
                 </button>
-                
                 {expandedFaq === faq.id && (
                   <div className="px-5 pb-4">
                     <p
