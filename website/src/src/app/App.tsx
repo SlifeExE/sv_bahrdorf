@@ -1307,7 +1307,7 @@ export function HomePage() {
         {/* Sponsor-Sidebars moved to after Hero */}
 
         {/* ─── Hero ─── */}
-        <header className="relative pt-6" style={{ background: "linear-gradient(180deg, #1a3a2e 0%, #2d8b6f 15%, #e85d3a 50%, #d4437a 75%, #1a1a2e 100%)", overflow: "visible" }}>
+        <header className="relative pt-2" style={{ background: "linear-gradient(180deg, #1a3a2e 0%, #2d8b6f 15%, #e85d3a 50%, #d4437a 75%, #1a1a2e 100%)", overflow: "visible" }}>
           <Fireworks />
           {/* ConfettiDots removed - now in outer wrapper */}
 
