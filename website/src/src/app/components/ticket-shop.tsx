@@ -132,6 +132,12 @@ function PretixCheckoutButton({
 
     container.appendChild(btn);
     btnRef.current = btn;
+
+    // Bei SPA-Navigation (React Router) läuft Pretix nicht neu –
+    // customElements.upgrade() initialisiert das Element manuell
+    if (window.customElements) {
+      window.customElements.upgrade(btn);
+    }
   }, []); // <-- leeres Array: nur EINMAL beim Mount
 
   // items + label nur per setAttribute updaten – kein neu-Erstellen
