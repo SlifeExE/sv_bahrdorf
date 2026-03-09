@@ -92,53 +92,57 @@ function PretixCheckoutButton({
   const btnRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Element NUR EINMAL beim Mount erstellen – Pretix initialisiert es dann
+  // Element erstellen NACHDEM pretix-button Custom Element definiert ist
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const btn = document.createElement(
-      "pretix-button",
-    ) as HTMLElement;
-    btn.setAttribute("event", PRETIX_EVENT_URL);
-    btn.setAttribute("items", itemsStr);
-    btn.style.cssText = `
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 32px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
-      color: white;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: 'Nunito', sans-serif;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
-      transition: transform 0.15s, box-shadow 0.15s;
-      white-space: nowrap;
-    `;
-    btn.textContent = label;
-    btn.onmouseenter = () => {
-      btn.style.transform = "scale(1.03)";
-      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
-    };
-    btn.onmouseleave = () => {
-      btn.style.transform = "scale(1)";
-      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
+    const createBtn = () => {
+      const btn = document.createElement(
+        "pretix-button",
+      ) as HTMLElement;
+      btn.setAttribute("event", PRETIX_EVENT_URL);
+      btn.setAttribute("items", itemsStr);
+      btn.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 32px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: 'Nunito', sans-serif;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 4px 20px rgba(34,139,71,0.3);
+        transition: transform 0.15s, box-shadow 0.15s;
+        white-space: nowrap;
+      `;
+      btn.textContent = label;
+      btn.onmouseenter = () => {
+        btn.style.transform = "scale(1.03)";
+        btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
+      };
+      btn.onmouseleave = () => {
+        btn.style.transform = "scale(1)";
+        btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
+      };
+      container.appendChild(btn);
+      btnRef.current = btn;
     };
 
-    container.appendChild(btn);
-    btnRef.current = btn;
-
-    // Bei SPA-Navigation (React Router) läuft Pretix nicht neu –
-    // customElements.upgrade() initialisiert das Element manuell
+    // Warten bis Pretix das Custom Element registriert hat
     if (window.customElements) {
-      window.customElements.upgrade(btn);
+      window.customElements
+        .whenDefined("pretix-button")
+        .then(createBtn);
+    } else {
+      createBtn();
     }
-  }, []); // <-- leeres Array: nur EINMAL beim Mount
+  }, []); // nur einmal beim Mount
 
   // items + label nur per setAttribute updaten – kein neu-Erstellen
   useEffect(() => {
