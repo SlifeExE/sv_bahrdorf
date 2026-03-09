@@ -450,27 +450,27 @@ export function TicketShop() {
         </div>
 
         {/* ─── Warenkorb / Checkout ─── */}
-        {totalItems > 0 && (
-          <div
-            className="mt-8 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
-            style={{
-              background: "#ffffff",
-              boxShadow:
-                "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
-              border: "1px solid rgba(0,0,0,0.06)",
-            }}
-          >
-            <div>
-              <span
-                className="text-gray-400"
-                style={{ fontSize: 13 }}
-              >
-                Deine Auswahl
-              </span>
-              <div className="flex flex-wrap items-baseline gap-3 mt-1">
-                {TICKETS.filter(
-                  (t) => quantities[t.id] > 0,
-                ).map((t) => (
+        {/* display:none statt conditional render – Pretix initialisiert Button beim Seitenstart */}
+        <div
+          className="mt-8 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{
+            background: "#ffffff",
+            boxShadow:
+              "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+            border: "1px solid rgba(0,0,0,0.06)",
+            display: totalItems > 0 ? "flex" : "none",
+          }}
+        >
+          <div>
+            <span
+              className="text-gray-400"
+              style={{ fontSize: 13 }}
+            >
+              Deine Auswahl
+            </span>
+            <div className="flex flex-wrap items-baseline gap-3 mt-1">
+              {TICKETS.filter((t) => quantities[t.id] > 0).map(
+                (t) => (
                   <span
                     key={t.id}
                     className="text-gray-700"
@@ -478,16 +478,22 @@ export function TicketShop() {
                   >
                     {quantities[t.id]}× {t.name}
                   </span>
-                ))}
-              </div>
+                ),
+              )}
             </div>
-
-            <PretixCheckoutButton
-              itemsStr={checkoutItemsStr}
-              label={`🛒 Zur Kasse (${totalItems} Ticket${totalItems !== 1 ? "s" : ""})`}
-            />
           </div>
-        )}
+          <PretixCheckoutButton
+            itemsStr={
+              checkoutItemsStr ||
+              `item_${TICKETS[0].pretixItemId}=1`
+            }
+            label={
+              totalItems > 0
+                ? `🛒 Zur Kasse (${totalItems} Ticket${totalItems !== 1 ? "s" : ""})`
+                : "Zur Kasse"
+            }
+          />
+        </div>
 
         {/* ─── Info Hinweise ─── */}
         <div className="mt-12 grid sm:grid-cols-3 gap-4">
