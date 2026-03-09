@@ -630,6 +630,7 @@ export function TicketShop() {
                     }}
                   />
                 </button>
+                
                 {expandedFaq === faq.id && (
                   <div className="px-5 pb-4">
                     <p
