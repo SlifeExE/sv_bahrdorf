@@ -92,12 +92,14 @@ function PretixCheckoutButton({
   const btnRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Element erstellen NACHDEM pretix-button Custom Element definiert ist
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    let cancelled = false;
+
     const createBtn = () => {
+      if (cancelled || !containerRef.current) return;
       const btn = document.createElement(
         "pretix-button",
       ) as HTMLElement;
@@ -130,18 +132,23 @@ function PretixCheckoutButton({
         btn.style.transform = "scale(1)";
         btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
       };
-      container.appendChild(btn);
+      containerRef.current.appendChild(btn);
       btnRef.current = btn;
     };
 
-    // Warten bis Pretix das Custom Element registriert hat
-    if (window.customElements) {
-      window.customElements
+    // Bereits registriert (z.B. direkte URL oder nach Refresh)? Sofort erstellen.
+    // Noch nicht registriert (SPA-Navigation)? Warten.
+    if (customElements.get("pretix-button")) {
+      createBtn();
+    } else {
+      customElements
         .whenDefined("pretix-button")
         .then(createBtn);
-    } else {
-      createBtn();
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, []); // nur einmal beim Mount
 
   // items + label nur per setAttribute updaten – kein neu-Erstellen
