@@ -89,13 +89,13 @@ function PretixCheckoutButton({
   itemsStr: string;
   label: string;
 }) {
+  const btnRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Element NUR EINMAL beim Mount erstellen – Pretix initialisiert es dann
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    container.innerHTML = "";
 
     const btn = document.createElement(
       "pretix-button",
@@ -131,10 +131,14 @@ function PretixCheckoutButton({
     };
 
     container.appendChild(btn);
+    btnRef.current = btn;
+  }, []); // <-- leeres Array: nur EINMAL beim Mount
 
-    // Pretix custom element muss explizit upgegraded werden nach DOM-Insert
-    if (window.customElements) {
-      window.customElements.upgrade(btn);
+  // items + label nur per setAttribute updaten – kein neu-Erstellen
+  useEffect(() => {
+    if (btnRef.current) {
+      btnRef.current.setAttribute("items", itemsStr);
+      btnRef.current.textContent = label;
     }
   }, [itemsStr, label]);
 
