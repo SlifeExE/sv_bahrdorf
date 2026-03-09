@@ -93,13 +93,10 @@ function PretixCheckoutButton({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const createBtn = () => {
-      if (cancelled || !containerRef.current) return;
+      if (!containerRef.current || btnRef.current) return;
       const btn = document.createElement(
         "pretix-button",
       ) as HTMLElement;
@@ -136,19 +133,18 @@ function PretixCheckoutButton({
       btnRef.current = btn;
     };
 
-    // Bereits registriert (z.B. direkte URL oder nach Refresh)? Sofort erstellen.
-    // Noch nicht registriert (SPA-Navigation)? Warten.
-    if (customElements.get("pretix-button")) {
-      createBtn();
-    } else {
-      customElements
-        .whenDefined("pretix-button")
-        .then(createBtn);
-    }
-
-    return () => {
-      cancelled = true;
+    // Alle 100ms prüfen ob pretix-button registriert ist (max 10s)
+    let attempts = 0;
+    const poll = () => {
+      if (customElements.get("pretix-button")) {
+        createBtn();
+      } else if (attempts++ < 100) {
+        timeoutId = setTimeout(poll, 100);
+      }
     };
+    poll();
+
+    return () => clearTimeout(timeoutId);
   }, []); // nur einmal beim Mount
 
   // items + label nur per setAttribute updaten – kein neu-Erstellen
