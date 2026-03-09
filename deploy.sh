@@ -30,6 +30,7 @@ echo " ✓ pretix.cfg patched"
 echo "Deploying pretix..."
 cd /opt/sv_bahrdorf/pretix
 docker compose up -d --build
+docker restart sv_bahrdorf_pretix
 echo " ✓ Pretix deployed"
 
 echo "Building and deploying website..."
@@ -37,7 +38,7 @@ cd /opt/sv_bahrdorf/website
 docker compose -f compose/prod/docker-compose.yml up -d --build
 
 echo "Waiting for containers..."
-sleep 5
+sleep 8
 
 echo "Health checks..."
 curl -sf http://127.0.0.1:7090/health && echo " ✓ Website is live!" || echo " ✗ Website health check failed!"
