@@ -1307,7 +1307,7 @@ export function HomePage() {
         {/* Sponsor-Sidebars moved to after Hero */}
 
         {/* ─── Hero ─── */}
-        <header className="relative pt-14" style={{ background: "linear-gradient(180deg, #1a3a2e 0%, #2d8b6f 15%, #e85d3a 50%, #d4437a 75%, #1a1a2e 100%)", overflow: "visible" }}>
+        <header className="relative pt-6" style={{ background: "linear-gradient(180deg, #1a3a2e 0%, #2d8b6f 15%, #e85d3a 50%, #d4437a 75%, #1a1a2e 100%)", overflow: "visible" }}>
           <Fireworks />
           {/* ConfettiDots removed - now in outer wrapper */}
 
@@ -1521,7 +1521,7 @@ export function HomePage() {
           <div className="relative z-10 -mt-11 md:-mt-15">
             <Pennants />
           </div>
-          <div className="relative z-10 text-center px-4 pb-4" style={{ marginTop: "3rem" }}>
+          <div className="relative z-10 text-center px-4 pb-4" style={{ marginTop: "2rem" }}>
             <h1
               className="text-white mb-2 drop-shadow-lg"
               style={{ fontSize: "clamp(42px, 8vw, 80px)", fontFamily: "'Playfair Display', serif", fontWeight: 900, lineHeight: 1.1, marginTop: "-2rem" }}
