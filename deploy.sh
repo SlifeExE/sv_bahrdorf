@@ -27,12 +27,18 @@ fi
 sed -i "s|^password=.*|password=${PRETIX_DB_PASSWORD}|" /opt/sv_bahrdorf/pretix/config/pretix.cfg
 echo " ✓ pretix.cfg patched"
 
-echo "Building and deploying..."
+echo "Deploying pretix..."
+cd /opt/sv_bahrdorf/pretix
+docker compose up -d --build
+echo " ✓ Pretix deployed"
+
+echo "Building and deploying website..."
 cd /opt/sv_bahrdorf/website
 docker compose -f compose/prod/docker-compose.yml up -d --build
 
-echo "Waiting for container..."
-sleep 2
+echo "Waiting for containers..."
+sleep 5
 
-echo "Health check..."
-curl -sf http://127.0.0.1:7090/health && echo " ✓ Website is live!" || echo " ✗ Health check failed!"
+echo "Health checks..."
+curl -sf http://127.0.0.1:7090/health && echo " ✓ Website is live!" || echo " ✗ Website health check failed!"
+curl -sf http://127.0.0.1:7091/svbahrdorf/tickets/ -o /dev/null && echo " ✓ Pretix is live!" || echo " ✗ Pretix health check failed!"
