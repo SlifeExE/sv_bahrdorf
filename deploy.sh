@@ -38,7 +38,7 @@ cd /opt/sv_bahrdorf/website
 docker compose -f compose/prod/docker-compose.yml up -d --build
 
 echo "Waiting for containers..."
-sleep 15
+sleep 10
 
 echo "Health checks..."
 curl -sf http://127.0.0.1:7090/health && echo " ✓ Website is live!" || echo " ✗ Website health check failed!"
