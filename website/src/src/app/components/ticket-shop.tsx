@@ -82,7 +82,7 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/* ── Pretix Button Wrapper ── */
+/* ── Pretix Button Wrapper (identisch mit den funktionierenden Einzelbuttons) ── */
 function PretixCheckoutButton({
   itemsStr,
   label,
@@ -96,7 +96,6 @@ function PretixCheckoutButton({
     const container = containerRef.current;
     if (!container) return;
 
-    // Remove existing button
     container.innerHTML = "";
 
     const btn = document.createElement(
@@ -163,7 +162,6 @@ export function TicketShop() {
     0,
   );
 
-  // Build items string for pretix-button: "item_3=2,item_2=1"
   const checkoutItemsStr = TICKETS.filter(
     (t) => (quantities[t.id] || 0) > 0,
   )
@@ -446,20 +444,12 @@ export function TicketShop() {
                     </button>
                   </div>
                 </div>
-
-                {/* Per-ticket pretix-button (quantity 1) */}
-                <div className="mt-4 flex justify-center">
-                  <PretixCheckoutButton
-                    itemsStr={`item_${ticket.pretixItemId}=1`}
-                    label={`1× ${ticket.name} kaufen`}
-                  />
-                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ─── Cart Summary / Checkout ─── */}
+        {/* ─── Warenkorb / Checkout ─── */}
         {totalItems > 0 && (
           <div
             className="mt-8 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
@@ -493,7 +483,7 @@ export function TicketShop() {
             </div>
             <PretixCheckoutButton
               itemsStr={checkoutItemsStr}
-              label="Zur Kasse"
+              label={`🛒 Zur Kasse (${totalItems} Ticket${totalItems !== 1 ? "s" : ""})`}
             />
           </div>
         )}
