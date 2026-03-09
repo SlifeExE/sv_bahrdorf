@@ -12,67 +12,65 @@ import {
   Ticket,
   Star,
   ChevronDown,
-  Loader2,
 } from "lucide-react";
 
-/* ── Pretix Config ── */
-const PRETIX_BASE_URL = "https://tickets.svbahrdorf.de";
-const PRETIX_ORGANIZER = "svbahrdorf";
-const PRETIX_EVENT = "tickets";
-// API calls laufen über Nginx-Proxy → kein Token im Frontend nötig
-const PRETIX_PROXY_URL = "/pretix-api";
+/* ── Pretix custom element TypeScript declaration ── */
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "pretix-button": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement>,
+        HTMLElement
+      > & {
+        event?: string;
+        items?: string;
+        voucher?: string;
+        "skip-ssl-check"?: boolean;
+      };
+    }
+  }
+}
 
-/* ── Ticket types ── */
 interface TicketType {
   id: string;
   name: string;
-  date: string;
   dateShort: string;
   weekday: string;
   description: string;
-  price: number | null;
-  currency: string;
-  available: boolean;
-  pretixItemId: number;
   features: string[];
   timeInfo: string;
-  startTime?: string;
   maxPerOrder: number;
+  pretixItemId: number;
 }
+
+const PRETIX_EVENT_URL =
+  "https://tickets.svbahrdorf.de/svbahrdorf/tickets/";
 
 const TICKETS: TicketType[] = [
   {
     id: "samstag-ticket",
     name: "Samstags-Ticket",
-    date: "2026-09-12",
-    dateShort: "12.09.2026",
+    dateShort: "13.09.2026",
     weekday: "Samstag",
     description:
       "Eintritt zur großen Partynacht mit Coverband im Festzelt. Der Samstag ist DAS Highlight des Schützenfests!",
-    price: null,
-    currency: "EUR",
-    available: true,
     pretixItemId: 3,
     features: [
       "Eintritt ins Festzelt ab 19:30 Uhr",
       "Proklamation der Majestäten",
-      "Live-Musik: Coverband",
+      "Live-Musik: Coverband Das Fiasko",
       "Party bis Open End",
     ],
-    timeInfo: "Ab 20:00 Uhr",
+    timeInfo: "Einlass ab 19:30 Uhr",
     maxPerOrder: 10,
   },
   {
     id: "katerfruehstueck",
     name: "Katerfrühstück",
-    date: "2026-09-13",
-    dateShort: "13.09.2026",
+    dateShort: "14.09.2026",
     weekday: "Sonntag",
     description:
       "Gemütliches Katerfrühstück am Sonntagmorgen im Festzelt – der perfekte Ausklang des Schützenfest-Wochenendes.",
-    price: null,
-    currency: "EUR",
-    available: true,
     pretixItemId: 2,
     features: [
       "Reichhaltiges Frühstücksbuffet",
@@ -84,135 +82,63 @@ const TICKETS: TicketType[] = [
   },
 ];
 
-/* ── Pretix API: Preise + Verfügbarkeit laden (via Nginx-Proxy) ── */
-async function fetchPretixItems(): Promise<Record<
-  number,
-  { price: number; available: boolean }
-> | null> {
-  const res = await fetch(
-    `${PRETIX_PROXY_URL}/organizers/${PRETIX_ORGANIZER}/events/${PRETIX_EVENT}/items/`,
-  );
-  if (!res.ok)
-    throw new Error(`Pretix API error: ${res.status}`);
-  const data = await res.json();
-
-  const result: Record<
-    number,
-    { price: number; available: boolean }
-  > = {};
-  for (const item of data.results ?? []) {
-    result[item.id] = {
-      price: parseFloat(item.default_price),
-      available: item.active && !item.has_variations,
-    };
-  }
-  return result;
-}
-
-/* ── Format price ── */
-function formatPrice(price: number | null): string {
-  if (price === null) return "...";
-  if (price === 0) return "Preis folgt";
-  return `${price.toFixed(2).replace(".", ",")} €`;
-}
-
-/* ── Pretix Button ── */
-/* Rendert ein <pretix-button>-Custom-Element mit dem items-Attribut
-   basierend auf der Nutzerauswahl. Pretix-JS (in App.tsx vorgeladen)
-   macht daraus einen funktionierenden Checkout-Button mit Overlay. */
+/* ── Pretix Button Wrapper ── */
 function PretixCheckoutButton({
-  tickets,
-  quantities,
+  itemsStr,
+  label,
 }: {
-  tickets: TicketType[];
-  quantities: Record<string, number>;
+  itemsStr: string;
+  label: string;
 }) {
-  const btnRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Build items string: "item_3=2,item_2=1"
-  const itemsStr = tickets
-    .filter((t) => (quantities[t.id] || 0) > 0)
-    .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
-    .join(",");
-
-  const shopUrl = "https://tickets.svbahrdorf.de/svbahrdorf/tickets/";
-
-  // Pretix custom elements müssen per DOM erzeugt werden,
-  // damit Pretix-JS sie korrekt erkennt und initialisiert.
   useEffect(() => {
-    const container = btnRef.current;
+    const container = containerRef.current;
     if (!container) return;
 
+    // Remove existing button
     container.innerHTML = "";
 
-    const btn = document.createElement("pretix-button");
-    btn.setAttribute("event", shopUrl);
-    if (itemsStr) {
-      btn.setAttribute("items", itemsStr);
-    }
-
-    const inner = document.createElement("span");
-    inner.style.cssText = `
+    const btn = document.createElement(
+      "pretix-button",
+    ) as HTMLElement;
+    btn.setAttribute("event", PRETIX_EVENT_URL);
+    btn.setAttribute("items", itemsStr);
+    btn.style.cssText = `
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 12px 32px;
       border-radius: 12px;
+      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
       color: white;
       font-size: 15px;
       font-weight: 600;
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #228B47 0%, #1a6b3c 100%);
       cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 20px rgba(34,139,71,0.3);
       transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 14px rgba(34,139,71,0.3);
+      white-space: nowrap;
     `;
-    inner.textContent = "🎟️ Jetzt Tickets kaufen";
-    inner.onmouseenter = () => {
-      inner.style.transform = "scale(1.05)";
-      inner.style.boxShadow = "0 6px 20px rgba(34,139,71,0.4)";
+    btn.textContent = label;
+    btn.onmouseenter = () => {
+      btn.style.transform = "scale(1.03)";
+      btn.style.boxShadow = "0 6px 24px rgba(34,139,71,0.4)";
     };
-    inner.onmouseleave = () => {
-      inner.style.transform = "scale(1)";
-      inner.style.boxShadow = "0 4px 14px rgba(34,139,71,0.3)";
+    btn.onmouseleave = () => {
+      btn.style.transform = "scale(1)";
+      btn.style.boxShadow = "0 4px 20px rgba(34,139,71,0.3)";
     };
 
-    btn.appendChild(inner);
     container.appendChild(btn);
+  }, [itemsStr, label]);
 
-    // Pretix-JS auffordern, den neuen Button zu initialisieren
-    const tryBuild = () => {
-      if (typeof (window as any).PretixWidget !== "undefined") {
-        try {
-          (window as any).PretixWidget.buildWidgets();
-        } catch (_) {}
-      }
-    };
-    tryBuild();
-    setTimeout(tryBuild, 500);
-    setTimeout(tryBuild, 1500);
-  }, [itemsStr, shopUrl]);
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div ref={btnRef} className="inline-block" />
-      <a
-        href={shopUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-400 hover:text-gray-600 underline transition-colors"
-        style={{ fontSize: 12 }}
-      >
-        oder direkt zum Ticketshop →
-      </a>
-    </div>
-  );
+  return <div ref={containerRef} />;
 }
 
-/* ════════════════════════════════════════════ */
 export function TicketShop() {
-  const [tickets, setTickets] = useState<TicketType[]>(TICKETS);
-  const [loadingPrices, setLoadingPrices] = useState(true);
   const [quantities, setQuantities] = useState<
     Record<string, number>
   >(Object.fromEntries(TICKETS.map((t) => [t.id, 0])));
@@ -220,35 +146,9 @@ export function TicketShop() {
     null,
   );
 
-  /* Preise beim Laden von Pretix holen */
-  useEffect(() => {
-    fetchPretixItems()
-      .then((itemData) => {
-        if (!itemData) return;
-        setTickets((prev) =>
-          prev.map((t) => {
-            const live = itemData[t.pretixItemId];
-            if (!live) return t;
-            return {
-              ...t,
-              price: live.price,
-              available: live.available,
-            };
-          }),
-        );
-      })
-      .catch((err) => {
-        console.info(
-          "Pretix API nicht erreichbar, zeige Fallback-Preise.",
-          err?.message,
-        );
-      })
-      .finally(() => setLoadingPrices(false));
-  }, []);
-
   const updateQuantity = (id: string, delta: number) => {
     setQuantities((prev) => {
-      const ticket = tickets.find((t) => t.id === id);
+      const ticket = TICKETS.find((t) => t.id === id);
       const max = ticket?.maxPerOrder ?? 10;
       const next = Math.max(
         0,
@@ -262,20 +162,13 @@ export function TicketShop() {
     (a, b) => a + b,
     0,
   );
-  const totalPrice = tickets.reduce(
-    (sum, t) => sum + (t.price ?? 0) * (quantities[t.id] || 0),
-    0,
-  );
 
-  const handleCheckout = () => {
-    const hasItems = tickets.some(
-      (t) => (quantities[t.id] || 0) > 0,
-    );
-    if (!hasItems) return;
-    document
-      .getElementById("cart-summary")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Build items string for pretix-button: "item_3=2,item_2=1"
+  const checkoutItemsStr = TICKETS.filter(
+    (t) => (quantities[t.id] || 0) > 0,
+  )
+    .map((t) => `item_${t.pretixItemId}=${quantities[t.id]}`)
+    .join(",");
 
   const faqs = [
     {
@@ -286,7 +179,7 @@ export function TicketShop() {
     {
       id: "payment",
       q: "Welche Zahlungsmethoden werden akzeptiert?",
-      a: "Online-Zahlung per PayPal oder Überweisung. Tickets sind auch an der Abendkasse (nur Barzahlung) erhältlich.",
+      a: "Online-Zahlung per Kreditkarte, PayPal, Sofortüberweisung und Giropay. Tickets sind auch an der Abendkasse (nur Barzahlung) erhältlich.",
     },
     {
       id: "cancel",
@@ -345,14 +238,13 @@ export function TicketShop() {
           </div>
           <div className="w-[120px] flex justify-end">
             {totalItems > 0 && (
-              <button
-                onClick={handleCheckout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-sm transition-all hover:scale-105"
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-sm"
                 style={{ background: "#228B47" }}
               >
                 <ShoppingCart className="w-4 h-4" />
                 <span>{totalItems}</span>
-              </button>
+              </div>
             )}
           </div>
         </div>
@@ -413,7 +305,7 @@ export function TicketShop() {
       {/* ─── Ticket Cards ─── */}
       <section className="max-w-5xl mx-auto px-4 -mt-6 relative z-10 pb-12">
         <div className="grid md:grid-cols-2 gap-6">
-          {tickets.map((ticket) => (
+          {TICKETS.map((ticket) => (
             <div
               key={ticket.id}
               className="rounded-2xl overflow-hidden transition-shadow hover:shadow-xl"
@@ -422,8 +314,6 @@ export function TicketShop() {
                 boxShadow:
                   "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
                 border: "1px solid rgba(0,0,0,0.06)",
-                display: "flex",
-                flexDirection: "column",
               }}
             >
               {/* Card Header */}
@@ -468,7 +358,7 @@ export function TicketShop() {
               </div>
 
               {/* Card Body */}
-              <div className="px-6 py-5 flex flex-col flex-1">
+              <div className="px-6 py-5">
                 <p
                   className="text-gray-600"
                   style={{ fontSize: 14, lineHeight: 1.6 }}
@@ -494,20 +384,12 @@ export function TicketShop() {
                   ))}
                 </ul>
 
-                <div className="flex-1" />
-
                 <div
                   className="mt-4 flex items-center gap-2 text-gray-500"
                   style={{ fontSize: 13 }}
                 >
                   <Clock className="w-3.5 h-3.5" />
                   <span>{ticket.timeInfo}</span>
-                  {ticket.startTime && (
-                    <>
-                      <span className="text-gray-300">·</span>
-                      <span>{ticket.startTime}</span>
-                    </>
-                  )}
                 </div>
 
                 <div
@@ -515,41 +397,14 @@ export function TicketShop() {
                   style={{ borderColor: "rgba(0,0,0,0.1)" }}
                 />
 
-                {/* Price & Quantity */}
+                {/* Quantity selector */}
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span
-                      className="text-gray-400 block"
-                      style={{ fontSize: 12 }}
-                    >
-                      Preis pro Ticket
-                    </span>
-                    <span
-                      className="mt-0.5 flex items-center gap-2"
-                      style={{
-                        fontSize:
-                          ticket.price === null ||
-                          ticket.price === 0
-                            ? 16
-                            : 24,
-                        color:
-                          ticket.price === null ||
-                          ticket.price === 0
-                            ? "#999"
-                            : "#1a1a2e",
-                        fontFamily: "'Nunito', sans-serif",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {loadingPrices &&
-                        ticket.price === null && (
-                          <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                        )}
-                      {formatPrice(ticket.price)}
-                    </span>
-                  </div>
-
-                  {/* Quantity selector */}
+                  <span
+                    className="text-gray-500"
+                    style={{ fontSize: 14 }}
+                  >
+                    Anzahl wählen
+                  </span>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() =>
@@ -581,9 +436,8 @@ export function TicketShop() {
                         updateQuantity(ticket.id, 1)
                       }
                       disabled={
-                        !ticket.available ||
                         (quantities[ticket.id] || 0) >=
-                          ticket.maxPerOrder
+                        ticket.maxPerOrder
                       }
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-30 hover:scale-105"
                       style={{ background: "#228B47" }}
@@ -591,6 +445,14 @@ export function TicketShop() {
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
+                </div>
+
+                {/* Per-ticket pretix-button (quantity 1) */}
+                <div className="mt-4 flex justify-center">
+                  <PretixCheckoutButton
+                    itemsStr={`item_${ticket.pretixItemId}=1`}
+                    label={`1× ${ticket.name} kaufen`}
+                  />
                 </div>
               </div>
             </div>
@@ -607,7 +469,6 @@ export function TicketShop() {
                 "0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
               border: "1px solid rgba(0,0,0,0.06)",
             }}
-            id="cart-summary"
           >
             <div>
               <span
@@ -616,35 +477,23 @@ export function TicketShop() {
               >
                 Deine Auswahl
               </span>
-              <div className="flex items-baseline gap-3 mt-1">
-                {tickets
-                  .filter((t) => quantities[t.id] > 0)
-                  .map((t) => (
-                    <span
-                      key={t.id}
-                      className="text-gray-700"
-                      style={{ fontSize: 14 }}
-                    >
-                      {quantities[t.id]}× {t.name}
-                    </span>
-                  ))}
+              <div className="flex flex-wrap items-baseline gap-3 mt-1">
+                {TICKETS.filter(
+                  (t) => quantities[t.id] > 0,
+                ).map((t) => (
+                  <span
+                    key={t.id}
+                    className="text-gray-700"
+                    style={{ fontSize: 14 }}
+                  >
+                    {quantities[t.id]}× {t.name}
+                  </span>
+                ))}
               </div>
-              {totalPrice > 0 && (
-                <p
-                  className="mt-1"
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: "#1a1a2e",
-                  }}
-                >
-                  Gesamt: {formatPrice(totalPrice)}
-                </p>
-              )}
             </div>
             <PretixCheckoutButton
-              tickets={tickets}
-              quantities={quantities}
+              itemsStr={checkoutItemsStr}
+              label="Zur Kasse"
             />
           </div>
         )}
