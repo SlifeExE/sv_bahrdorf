@@ -136,10 +136,22 @@ function PretixCheckoutButton({
     // Alle 100ms prüfen ob pretix-button registriert ist (max 10s)
     let attempts = 0;
     const poll = () => {
-      if (customElements.get("pretix-button")) {
+      const defined = customElements.get("pretix-button");
+      console.log(
+        `[PretixBtn] attempt ${attempts}: defined=${!!defined}, container=${!!containerRef.current}, btnRef=${!!btnRef.current}`,
+      );
+      if (defined) {
         createBtn();
+        console.log(
+          "[PretixBtn] createBtn called, btnRef=",
+          btnRef.current,
+        );
       } else if (attempts++ < 100) {
         timeoutId = setTimeout(poll, 100);
+      } else {
+        console.warn(
+          "[PretixBtn] gave up after 10s – pretix-button never registered",
+        );
       }
     };
     poll();
