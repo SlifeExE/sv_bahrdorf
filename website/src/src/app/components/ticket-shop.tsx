@@ -147,7 +147,8 @@ export function TicketShop() {
     >
       {/* ─── Pretix Button Styles ─── */}
       <style>{`
-        .pretix-button {
+        .pretix-button,
+        pretix-button {
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -166,7 +167,8 @@ export function TicketShop() {
           white-space: nowrap !important;
           text-decoration: none !important;
         }
-        .pretix-button:hover {
+        .pretix-button:hover,
+        pretix-button:hover {
           transform: scale(1.03) !important;
           box-shadow: 0 6px 24px rgba(34,139,71,0.4) !important;
         }
@@ -448,37 +450,14 @@ export function TicketShop() {
                 ))}
               </div>
             </div>
-            {/* pretix-button unsichtbar über styled button gestapelt */}
-            <div
-              style={{
-                position: "relative",
-                display: "inline-flex",
-              }}
+            <pretix-button
+              event={PRETIX_EVENT_URL}
+              items={checkoutItemsStr}
+              className="pretix-button"
             >
-              {/* Sichtbarer styled Button */}
-              <button
-                className="pretix-button"
-                style={{ pointerEvents: "none" }}
-              >
-                🛒 Zur Kasse ({totalItems} Ticket
-                {totalItems !== 1 ? "s" : ""})
-              </button>
-              {/* pretix-button liegt drüber, vollflächig, transparent */}
-              <pretix-button
-                event={PRETIX_EVENT_URL}
-                items={checkoutItemsStr}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  opacity: 0,
-                  width: "100%",
-                  height: "100%",
-                  cursor: "pointer",
-                }}
-              >
-                buy
-              </pretix-button>
-            </div>
+              🛒 Zur Kasse ({totalItems} Ticket
+              {totalItems !== 1 ? "s" : ""})
+            </pretix-button>
           </div>
         )}
 
