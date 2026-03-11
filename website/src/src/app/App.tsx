@@ -3,6 +3,8 @@ import { MapPin, Calendar, Clock, Phone, Mail, PartyPopper, Star, Music, Beer, U
 import { Link, RouterProvider, createBrowserRouter } from "react-router";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Fireworks } from "./components/fireworks";
+import { AGBPage } from "./components/agb-page";
+import { DatenschutzPage } from "./components/datenschutz-page";
 import { DiscoBall } from "./components/disco-ball";
 import { TicketButton } from "./components/ticket-button";
 import { TicketShop } from "./components/ticket-shop";
@@ -1366,8 +1368,8 @@ export function HomePage() {
               className="flex absolute flex-col items-center z-20 pointer-events-auto"
               style={{ top: "52%", left: "6%", animation: "float-bob 4.5s ease-in-out infinite" }}
             >
-              <div className="relative group cursor-pointer" style={{ width: 130, height: 130 }}>
-                <div className="absolute inset-0 rounded-2xl opacity-50 group-hover:opacity-80 transition-opacity" style={{
+              <div className="relative" style={{ width: 130, height: 130 }}>
+                <div className="absolute inset-0 rounded-2xl opacity-50" style={{
                   background: "radial-gradient(circle, rgba(107,63,160,0.5) 0%, transparent 70%)",
                   filter: "blur(16px)",
                   transform: "scale(1.4)",
@@ -1375,7 +1377,7 @@ export function HomePage() {
                 <img
                   src={flohmarktImg}
                   alt="Flohmarkt"
-                  className="relative w-full h-full object-contain drop-shadow-lg transition-transform group-hover:scale-110"
+                  className="relative w-full h-full object-contain drop-shadow-lg"
                   style={{ filter: "drop-shadow(0 4px 12px rgba(107,63,160,0.5))" }}
                 />
               </div>
@@ -1430,11 +1432,11 @@ export function HomePage() {
               style={{ top: "18%", right: "9%", animation: "float-bob 4s ease-in-out infinite" }}
             >
               <div
-                className="relative group cursor-pointer"
+                className="relative"
                 style={{ width: 200, height: 160 }}
               >
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-60 group-hover:opacity-90 transition-opacity"
+                  className="absolute inset-0 rounded-2xl opacity-60"
                   style={{
                     background: "radial-gradient(circle, rgba(232,93,58,0.5) 0%, transparent 70%)",
                     filter: "blur(20px)",
@@ -1444,7 +1446,7 @@ export function HomePage() {
                 <img
                   src={autoscooterImg}
                   alt="Autoscooter"
-                  className="relative w-full h-full object-contain drop-shadow-2xl transition-transform group-hover:scale-110"
+                  className="relative w-full h-full object-contain drop-shadow-2xl"
                   style={{ filter: "drop-shadow(0 8px 24px rgba(232,93,58,0.6))" }}
                 />
                 <p
@@ -1913,6 +1915,15 @@ export function HomePage() {
           </div>
           <div className="border-t border-white/10 mt-10 pt-6 text-center text-white/40" style={{ fontSize: 12 }}>
             <p>© 2026 Schützenverein Bahrdorf 1850 e.V. — Alle Rechte vorbehalten.</p>
+            <div className="flex items-center justify-center gap-4 mt-3">
+              <Link to="/agb" className="text-white/40 hover:text-accent transition-colors underline underline-offset-2">
+                AGB & Widerrufsbelehrung
+              </Link>
+              <span className="text-white/20">|</span>
+              <Link to="/datenschutz" className="text-white/40 hover:text-accent transition-colors underline underline-offset-2">
+                Datenschutz
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
@@ -1926,6 +1937,8 @@ export function HomePage() {
 const router = createBrowserRouter([
   { path: "/", Component: HomePage },
   { path: "/tickets", Component: TicketShop },
+  { path: "/agb", Component: AGBPage },
+  { path: "/datenschutz", Component: DatenschutzPage },
 ]);
 
 export default function App() {
