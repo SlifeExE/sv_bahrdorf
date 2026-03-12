@@ -49,10 +49,12 @@ export function DatenschutzPage() {
             </p>
             <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
               <p>Schützenverein Bahrdorf 1850 e.V.</p>
+              <p className="mt-2">1. Vorsitzender Frederic Broistedt</p>
               <p>Helmstedter Straße 4</p>
               <p>38459 Bahrdorf</p>
-              <p className="mt-2">Vertreten durch den 1. Vorsitzenden</p>
-              <p>Frederic Broistedt</p>
+              <p className="mt-2">Schützenheim (keine Postadresse)</p>
+              <p>Schulstraße 2</p>
+              <p>38459 Bahrdorf</p>
               <p className="mt-2">E-Mail: <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a></p>
             </div>
           </section>
