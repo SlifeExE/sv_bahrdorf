@@ -11,13 +11,13 @@ export function DatenschutzPage() {
             className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
             style={{ fontSize: 14, fontFamily: "'Fredoka', sans-serif" }}
           >
-            &larr; Zurueck zur Startseite
+            &larr; Zurück zur Startseite
           </Link>
           <span
             className="text-white/60"
             style={{ fontSize: 12, fontFamily: "'Nunito', sans-serif" }}
           >
-            Schuetzenverein Bahrdorf 1850 e.V.
+            Schützenverein Bahrdorf 1850 e.V.
           </span>
         </div>
       </nav>
@@ -32,108 +32,260 @@ export function DatenschutzPage() {
             lineHeight: 1.2,
           }}
         >
-          Datenschutzerklaerung
+          Datenschutzerklärung
         </h1>
 
         <div
           className="space-y-8"
           style={{ fontFamily: "'Nunito', sans-serif", fontSize: 15, lineHeight: 1.8 }}
         >
+          {/* 1. Verantwortlicher */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               1. Verantwortlicher
             </h2>
             <p className="text-white/70">
-              Verantwortlich fuer die Datenverarbeitung auf dieser Website ist:
+              Verantwortlich für die Datenverarbeitung auf dieser Website ist:
             </p>
             <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
-              <p>Schuetzenverein Bahrdorf 1850 e.V.</p>
-              <p>1. Vorsitzender Frederic Broistedt</p>
-              <p>Helmstedter Strasse 4</p>
+              <p>Schützenverein Bahrdorf 1850 e.V.</p>
+              <p>vertreten durch den 1. Vorsitzenden</p>
+              <p>Frederic Broistedt</p>
+              <p className="mt-2">Helmstedter Straße 4</p>
               <p>38459 Bahrdorf</p>
+              <p className="mt-2">E-Mail: <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a></p>
             </div>
           </section>
 
+          {/* 2. Hosting und technischer Betrieb */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              2. Erhebung und Speicherung personenbezogener Daten
+              2. Hosting und technischer Betrieb
             </h2>
             <p className="text-white/70">
-              Beim Besuch unserer Website werden automatisch Informationen durch den Browser uebermittelt und
-              in Server-Logfiles gespeichert. Dies umfasst Browsertyp und -version, verwendetes Betriebssystem,
-              Referrer-URL, Hostname des zugreifenden Rechners, Uhrzeit der Serveranfrage und die IP-Adresse.
-              Eine Zusammenfuehrung dieser Daten mit anderen Datenquellen wird nicht vorgenommen.
+              Die Website wird technisch betrieben und administriert durch:
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              3. Ticketkauf ueber Pretix
-            </h2>
-            <p className="text-white/70">
-              Fuer den Ticketverkauf nutzen wir den Dienst Pretix. Beim Kauf eines Tickets werden Sie auf das
-              Pretix-System weitergeleitet. Die dort erhobenen Daten (Name, E-Mail-Adresse, Zahlungsdaten) werden
-              gemaess der Datenschutzerklaerung von Pretix verarbeitet. Wir erhalten lediglich die fuer die
-              Abwicklung der Veranstaltung notwendigen Daten (Name, Ticketart).
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              4. Cookies
-            </h2>
-            <p className="text-white/70">
-              Unsere Website verwendet keine eigenen Tracking-Cookies. Technisch notwendige Cookies koennen durch
-              eingebundene Drittanbieter-Dienste (z.B. Pretix-Widget) gesetzt werden. Diese dienen ausschliesslich
-              der technischen Funktionalitaet.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              5. Eingebundene Dienste
-            </h2>
-            <p className="text-white/70">
-              <strong className="text-white/90">Google Fonts:</strong> Wir nutzen Google Fonts zur Darstellung von Schriftarten.
-              Beim Aufruf der Seite werden Schriftarten von Google-Servern geladen, wobei Ihre IP-Adresse an
-              Google uebermittelt wird. Weitere Informationen finden Sie in der Datenschutzerklaerung von Google.
+            <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
+              <p>Kamil Szuba – IT &amp; Digital Solutions</p>
+            </div>
+            <p className="text-white/70 mt-3">
+              Der technische Betreiber stellt die Infrastruktur für den Betrieb der Website und des Ticketshops bereit.
             </p>
             <p className="text-white/70 mt-3">
-              <strong className="text-white/90">Unsplash:</strong> Fuer Bildmaterial nutzen wir den Dienst Unsplash. Beim Laden der
-              Bilder wird Ihre IP-Adresse an Unsplash uebermittelt.
+              Die Verarbeitung erfolgt ausschließlich im Auftrag des Verantwortlichen gemäß Art. 28 DSGVO (Auftragsverarbeitung).
+            </p>
+            <p className="text-white/70 mt-3">
+              Der technische Betreiber verarbeitet personenbezogene Daten ausschließlich nach Weisung des Verantwortlichen und nur soweit dies für den technischen Betrieb der Website erforderlich ist.
             </p>
           </section>
 
+          {/* 3. Zugriffsdaten und Server-Logfiles */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              6. Ihre Rechte
+              3. Zugriffsdaten und Server-Logfiles
             </h2>
             <p className="text-white/70">
-              Sie haben gegenueber uns folgende Rechte hinsichtlich Ihrer personenbezogenen Daten:
+              Beim Besuch unserer Website werden automatisch Informationen durch den Browser übermittelt und in sogenannten Server-Logfiles gespeichert.
+            </p>
+            <p className="text-white/70 mt-3">
+              Erfasst werden können:
+            </p>
+            <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
+              <li>Browsertyp und Browserversion</li>
+              <li>verwendetes Betriebssystem</li>
+              <li>Referrer-URL</li>
+              <li>Hostname des zugreifenden Rechners</li>
+              <li>Datum und Uhrzeit der Serveranfrage</li>
+              <li>IP-Adresse</li>
+            </ul>
+            <p className="text-white/70 mt-3">
+              Diese Daten dienen ausschließlich der technischen Überwachung, Sicherheit und Stabilität der Website.
+            </p>
+            <p className="text-white/70 mt-3">
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO
+            </p>
+          </section>
+
+          {/* 4. Ticketverkauf über Pretix */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              4. Ticketverkauf über Pretix
+            </h2>
+            <p className="text-white/70">
+              Für den Ticketverkauf nutzen wir das Ticket-System Pretix.
+            </p>
+            <p className="text-white/70 mt-3">
+              Pretix wird durch den technischen Betreiber dieser Website selbst gehostet und betrieben.
+            </p>
+            <p className="text-white/70 mt-3">
+              Beim Kauf eines Tickets werden personenbezogene Daten verarbeitet, insbesondere:
+            </p>
+            <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
+              <li>Name</li>
+              <li>E-Mail-Adresse</li>
+              <li>Ticketinformationen</li>
+              <li>Zahlungsinformationen</li>
+            </ul>
+            <p className="text-white/70 mt-3">
+              Die Verarbeitung erfolgt zur Abwicklung des Ticketkaufs und zur Durchführung der Veranstaltung.
+            </p>
+            <p className="text-white/70 mt-3">
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO
+            </p>
+          </section>
+
+          {/* 5. Zahlungsabwicklung */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              5. Zahlungsabwicklung
+            </h2>
+            <p className="text-white/70">
+              Für die Zahlungsabwicklung nutzen wir folgende Zahlungsarten:
+            </p>
+            <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
+              <li>PayPal (inkl. Kredit- und Debitkartenzahlung über PayPal)</li>
+              <li>Banküberweisung</li>
+            </ul>
+            <p className="text-white/70 mt-3">
+              Bei Zahlung über PayPal werden Zahlungsdaten an PayPal (Europe) S.à r.l. et Cie, S.C.A. übermittelt.
+            </p>
+            <p className="text-white/70 mt-3">
+              Weitere Informationen:{" "}
+              <a href="https://www.paypal.com/de/webapps/mpp/ua/privacy-full" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                https://www.paypal.com/de/webapps/mpp/ua/privacy-full
+              </a>
+            </p>
+          </section>
+
+          {/* 6. Cookies */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              6. Cookies
+            </h2>
+            <p className="text-white/70">
+              Unsere Website verwendet keine eigenen Tracking-Cookies.
+            </p>
+            <p className="text-white/70 mt-3">
+              Technisch notwendige Cookies können jedoch durch das Ticket-System Pretix gesetzt werden. Diese Cookies sind erforderlich, um die Funktion des Ticketshops sicherzustellen.
+            </p>
+            <p className="text-white/70 mt-3">
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO
+            </p>
+          </section>
+
+          {/* 7. Eingebundene Dienste */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              7. Eingebundene Dienste
+            </h2>
+
+            <h3 className="text-white/90 mt-4 mb-2" style={{ fontSize: 15, fontFamily: "'Fredoka', sans-serif" }}>
+              Google Fonts
+            </h3>
+            <p className="text-white/70">
+              Zur Darstellung von Schriftarten nutzt diese Website Google Fonts.
+            </p>
+            <p className="text-white/70 mt-3">
+              Beim Aufruf der Website werden Schriftarten von Servern der Google Ireland Limited geladen. Dabei kann Ihre IP-Adresse an Google übermittelt werden.
+            </p>
+            <p className="text-white/70 mt-2">
+              Weitere Informationen:{" "}
+              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                https://policies.google.com/privacy
+              </a>
+            </p>
+
+            <h3 className="text-white/90 mt-6 mb-2" style={{ fontSize: 15, fontFamily: "'Fredoka', sans-serif" }}>
+              Unsplash
+            </h3>
+            <p className="text-white/70">
+              Für Bildmaterial verwenden wir Inhalte des Dienstes Unsplash.
+            </p>
+            <p className="text-white/70 mt-3">
+              Beim Laden von Bildern können Verbindungen zu Servern von Unsplash hergestellt werden, wodurch Ihre IP-Adresse übertragen werden kann.
+            </p>
+            <p className="text-white/70 mt-2">
+              Weitere Informationen:{" "}
+              <a href="https://unsplash.com/privacy" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                https://unsplash.com/privacy
+              </a>
+            </p>
+          </section>
+
+          {/* 8. SSL- bzw. TLS-Verschlüsselung */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              8. SSL- bzw. TLS-Verschlüsselung
+            </h2>
+            <p className="text-white/70">
+              Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL- bzw. TLS-Verschlüsselung.
+            </p>
+            <p className="text-white/70 mt-3">
+              Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers mit https:// beginnt.
+            </p>
+          </section>
+
+          {/* 9. Speicherdauer */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              9. Speicherdauer
+            </h2>
+            <p className="text-white/70">
+              Personenbezogene Daten werden nur so lange gespeichert, wie dies zur Erfüllung der jeweiligen Zwecke erforderlich ist.
+            </p>
+            <p className="text-white/70 mt-3">
+              Daten aus Ticketkäufen können aus steuer- und buchhalterischen Gründen bis zu 10 Jahre gespeichert werden.
+            </p>
+          </section>
+
+          {/* 10. Ihre Rechte */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              10. Ihre Rechte
+            </h2>
+            <p className="text-white/70">
+              Sie haben gegenüber uns folgende Rechte:
             </p>
             <ul className="text-white/70 mt-3 space-y-1 pl-5 list-disc">
-              <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
-              <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
-              <li>Recht auf Loeschung (Art. 17 DSGVO)</li>
-              <li>Recht auf Einschraenkung der Verarbeitung (Art. 18 DSGVO)</li>
-              <li>Recht auf Datenuebertragbarkeit (Art. 20 DSGVO)</li>
-              <li>Recht auf Widerspruch (Art. 21 DSGVO)</li>
+              <li>Auskunft (Art. 15 DSGVO)</li>
+              <li>Berichtigung (Art. 16 DSGVO)</li>
+              <li>Löschung (Art. 17 DSGVO)</li>
+              <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+              <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+              <li>Widerspruch (Art. 21 DSGVO)</li>
             </ul>
+            <p className="text-white/70 mt-3">
+              Zur Ausübung Ihrer Rechte können Sie sich jederzeit an{" "}
+              <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a>{" "}
+              wenden.
+            </p>
           </section>
 
+          {/* 11. Beschwerderecht */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              7. Beschwerderecht
+              11. Beschwerderecht
             </h2>
             <p className="text-white/70">
-              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehoerde ueber die Verarbeitung Ihrer
-              personenbezogenen Daten zu beschweren. Die fuer Niedersachsen zustaendige Aufsichtsbehoerde ist
-              die Landesbeauftragte fuer den Datenschutz Niedersachsen.
+              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
             </p>
+            <p className="text-white/70 mt-3">
+              Zuständige Behörde:
+            </p>
+            <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
+              <p>Die Landesbeauftragte für den Datenschutz Niedersachsen</p>
+              <p>Prinzenstraße 5</p>
+              <p>30159 Hannover</p>
+              <p className="mt-2">
+                <a href="https://lfd.niedersachsen.de" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                  https://lfd.niedersachsen.de
+                </a>
+              </p>
+            </div>
           </section>
 
           <p className="text-white/40 mt-10" style={{ fontSize: 12 }}>
-            Stand: Maerz 2026 — Diese Datenschutzerklaerung ist ein Platzhalter und muss vor Veroeffentlichung rechtlich geprueft werden.
+            Stand: 11. März 2026
           </p>
         </div>
       </main>
@@ -141,7 +293,7 @@ export function DatenschutzPage() {
       {/* Mini-Footer */}
       <footer className="py-6 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
         <p className="text-white/40" style={{ fontSize: 12 }}>
-          &copy; 2026 Schuetzenverein Bahrdorf 1850 e.V.
+          &copy; 2026 Schützenverein Bahrdorf 1850 e.V.
         </p>
       </footer>
     </div>

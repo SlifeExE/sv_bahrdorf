@@ -8,6 +8,7 @@ import { DatenschutzPage } from "./components/datenschutz-page";
 import { DiscoBall } from "./components/disco-ball";
 import { TicketButton } from "./components/ticket-button";
 import { TicketShop } from "./components/ticket-shop";
+import { PennantsOverlay } from "./components/pennants";
 
 const fireworksImg = "https://images.unsplash.com/photo-1657032178129-fedec8a0947a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJld29ya3MlMjBuaWdodCUyMGNlbGVicmF0aW9ufGVufDF8fHx8MTc3MjU3NTY2NHww&ixlib=rb-4.1.0&q=80&w=1080";
 import autoscooterImg from "figma:asset/d301daf9d2eabbc76292ef3859a540092ad41a54.png";
@@ -787,38 +788,7 @@ const hauptRight = hauptsponsoren.filter((_, i) => i % 2 === 1);
 const sponsorenLeft = sponsoren.filter((_, i) => i % 2 === 0);
 const sponsorenRight = sponsoren.filter((_, i) => i % 2 === 1);
 
-/* ── Wimpelkette ── */
-function Pennants() {
-  const count = 12;
-  const green = "#006B3F";
-  const white = "#ffffff";
-  // Bezier: M0,10 Q600,50 1200,10 → y(t)=10+80t(1-t), x(t)=1200t
-  const getY = (x: number) => { const t = x / 1200; return 10 + 80 * t * (1 - t); };
-  const getAngle = (x: number) => {
-    const t = x / 1200;
-    return Math.atan2(80 - 160 * t, 1200) * (180 / Math.PI);
-  };
-  return (
-    <svg viewBox="0 0 1200 90" className="w-full" preserveAspectRatio="none" style={{ display: "block" }}>
-      <path d="M0,10 Q600,50 1200,10" stroke="rgba(255,255,255,0.3)" strokeWidth="2" fill="none" />
-      {Array.from({ length: count }).map((_, i) => {
-        const x = i * 100 + 50;
-        const ropeY = getY(x);
-        const angle = getAngle(x);
-        const fill = i % 2 === 0 ? green : white;
-        return (
-          <polygon
-            key={i}
-            points="-18,0 18,0 0,55"
-            fill={fill}
-            opacity={0.85}
-            transform={`translate(${x},${ropeY}) rotate(${angle})`}
-          />
-        );
-      })}
-    </svg>
-  );
-}
+/* ── Wimpelkette ── (jetzt in /src/app/components/pennants.tsx) */
 
 /* ── Konfetti ── */
 const confettiKeyframes = `
@@ -853,6 +823,21 @@ const confettiKeyframes = `
 @keyframes kid-jump {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-12px) scale(1.1); }
+}
+@keyframes floh-btn-pulse {
+  0%, 100% { box-shadow: 0 3px 15px rgba(107,63,160,0.5), 0 0 20px rgba(155,89,182,0.3); }
+  50% { box-shadow: 0 3px 25px rgba(107,63,160,0.8), 0 0 35px rgba(155,89,182,0.5); }
+}
+@keyframes floh-btn-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-3deg); }
+  30% { transform: rotate(3deg); }
+  45% { transform: rotate(-2deg); }
+  60% { transform: rotate(0deg); }
+}
+@keyframes floh-badge-bounce {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.15) translateY(-2px); }
 }
 @keyframes float-bob {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
@@ -1211,10 +1196,145 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
   );
 }
 
+/* ── Flohmarkt-Anmelde-Modal ── */
+function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [form, setForm] = useState({ name: "", email: "", telefon: "", anzahlTische: "1", nachricht: "" });
+  const [sent, setSent] = useState(false);
+
+  if (!open) return null;
+
+  const handleSend = () => {
+    const subject = encodeURIComponent(`Flohmarkt-Anmeldung Schützenfest 2026 – ${form.name}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nE-Mail: ${form.email}\nTelefon: ${form.telefon}\nAnzahl Tische/Stände: ${form.anzahlTische}\n\n${form.nachricht}`
+    );
+    window.location.href = `mailto:info@svbahrdorf.de?subject=${subject}&body=${body}`;
+    setSent(true);
+    setTimeout(() => {
+      setSent(false);
+      setForm({ name: "", email: "", telefon: "", anzahlTische: "1", nachricht: "" });
+      onClose();
+    }, 2500);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md rounded-2xl p-6"
+        style={{
+          background: "linear-gradient(135deg, #1a1a2e 0%, #2a1840 100%)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(107,63,160,0.2)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {sent ? (
+          <div className="text-center py-10">
+            <div className="text-5xl mb-4">🛍️</div>
+            <h3 className="text-white" style={{ fontSize: 20, fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+              Anmeldung gesendet!
+            </h3>
+            <p className="text-white/60 mt-2" style={{ fontSize: 14 }}>
+              Ihr E-Mail-Programm wurde geöffnet. Senden Sie die Nachricht ab, um Ihren Stand zu reservieren.
+            </p>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-white mb-1" style={{ fontSize: 20, fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+              🛍️ Flohmarkt-Anmeldung
+            </h3>
+            <p className="text-white/50 mb-1" style={{ fontSize: 13 }}>
+              Samstag, 13. Juni 2026 · Alte Turnhalle
+            </p>
+            <p className="text-white/40 mb-5" style={{ fontSize: 12 }}>
+              Melden Sie sich jetzt an und sichern Sie sich Ihren Standplatz!
+            </p>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Ihr Name *"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-lg text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-purple-400/50"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14 }}
+              />
+              <input
+                type="email"
+                placeholder="Ihre E-Mail-Adresse *"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-lg text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-purple-400/50"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14 }}
+              />
+              <input
+                type="tel"
+                placeholder="Telefonnummer (optional)"
+                value={form.telefon}
+                onChange={(e) => setForm({ ...form, telefon: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-lg text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-purple-400/50"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14 }}
+              />
+              <div className="flex items-center gap-3">
+                <label className="text-white/50 whitespace-nowrap" style={{ fontSize: 13 }}>Anzahl Tische:</label>
+                <select
+                  value={form.anzahlTische}
+                  onChange={(e) => setForm({ ...form, anzahlTische: e.target.value })}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-white outline-none focus:ring-2 focus:ring-purple-400/50"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14 }}
+                >
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <option key={n} value={n} style={{ background: "#1a1a2e" }}>{n}</option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                placeholder="Anmerkungen / Was verkaufen Sie? (optional)"
+                rows={3}
+                value={form.nachricht}
+                onChange={(e) => setForm({ ...form, nachricht: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-lg text-white placeholder-white/30 outline-none focus:ring-2 focus:ring-purple-400/50 resize-none"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14 }}
+              />
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={!form.name || !form.email}
+              className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              style={{
+                background: "linear-gradient(135deg, #6b3fa0, #8b4fcf)",
+                fontSize: 15,
+                boxShadow: "0 4px 20px rgba(107,63,160,0.4)",
+              }}
+            >
+              <Send className="w-4 h-4" />
+              Anmeldung absenden
+            </button>
+            <p className="text-white/30 text-center mt-3" style={{ fontSize: 11 }}>
+              Öffnet Ihr E-Mail-Programm mit vorausgefüllter Anmeldung
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ══════════ HOME PAGE ══════════ */
 
 export function HomePage() {
   const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [flohmarktModalOpen, setFlohmarktModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollTo = (id: string) => (e: React.MouseEvent) => {
@@ -1317,7 +1437,7 @@ export function HomePage() {
           {/* ▼ Ganzen linken Container hoch/runter: top-Wert ändern (z.B. top: "0%") */}
           <div
             className="hidden lg:block absolute left-0 w-1/2 z-20 pointer-events-none"
-            style={{ top: "-5%", bottom: 0 }}
+            style={{ top: "-12%", bottom: 0 }}
           >
             {/* ── Kaffee & Kuchen ── */}
             <div
@@ -1391,6 +1511,37 @@ export function HomePage() {
               >
                 Flohmarkt
               </p>
+              <button
+                onClick={() => setFlohmarktModalOpen(true)}
+                className="relative mt-2 px-4 py-2 rounded-full text-white flex items-center gap-2 transition-all hover:scale-110 hover:shadow-xl cursor-pointer"
+                style={{
+                  background: "linear-gradient(135deg, #6b3fa0, #9b59b6, #e85d3a)",
+                  fontSize: 12,
+                  fontFamily: "'Fredoka', sans-serif",
+                  boxShadow: "0 3px 20px rgba(107,63,160,0.6), 0 0 30px rgba(232,93,58,0.3)",
+                  animation: "floh-btn-pulse 2s ease-in-out infinite, floh-btn-wiggle 3s 1s ease-in-out infinite",
+                  border: "2px solid rgba(255,255,255,0.35)",
+                }}
+              >
+                <span className="absolute inset-0 rounded-full" style={{
+                  background: "linear-gradient(135deg, rgba(107,63,160,0.4), rgba(232,93,58,0.4))",
+                  filter: "blur(8px)",
+                  transform: "scale(1.3)",
+                  animation: "floh-btn-pulse 2s ease-in-out infinite",
+                }} />
+                <span className="relative flex items-center gap-1.5">
+                  <span>✍️</span> Stand anmelden!
+                </span>
+                <span className="absolute -top-2.5 -right-2.5 px-1.5 py-0.5 rounded-full text-white" style={{
+                  background: "linear-gradient(135deg, #e85d3a, #c41e3a)",
+                  fontSize: 8,
+                  fontFamily: "'Fredoka', sans-serif",
+                  boxShadow: "0 2px 8px rgba(232,93,58,0.6)",
+                  animation: "floh-badge-bounce 1.5s ease-in-out infinite",
+                }}>
+                  Jetzt!
+                </span>
+              </button>
             </div>
 
             {/* ── Tombola ── */}
@@ -1424,7 +1575,7 @@ export function HomePage() {
           {/* ▼ Ganzen rechten Container hoch/runter: top-Wert ändern (z.B. top: "0%") */}
           <div
             className="hidden lg:block absolute right-0 w-1/2 z-20 pointer-events-none"
-            style={{ top: "-5%", bottom: 0 }}
+            style={{ top: "-12%", bottom: 0 }}
           >
             {/* ── Autoscooter ── */}
             <div
@@ -1501,7 +1652,7 @@ export function HomePage() {
             {/* ── Volksmajestätenschießen ── */}
             <div
               className="flex absolute flex-col items-center z-20 pointer-events-auto"
-              style={{ top: "76%", right: "13%" }}
+              style={{ top: "73%", right: "13%" }}
             >
               <MiniSchiesstand />
               <p
@@ -1520,13 +1671,11 @@ export function HomePage() {
 
 
           {/* ▼ Wimpelkette: mobil mt-4 (weiter unten), Desktop -mt-16 (wie vorher -4rem) ── Zeile ~1493 */}
-          <div className="relative z-10 -mt-5 md:-mt-9">
-            <Pennants />
-          </div>
+          <PennantsOverlay />
           <div className="relative z-10 text-center px-4 pb-4" style={{ marginTop: "2rem" }}>
             <h1
-              className="text-white mb-2 drop-shadow-lg"
-              style={{ fontSize: "clamp(42px, 8vw, 80px)", fontFamily: "'Playfair Display', serif", fontWeight: 900, lineHeight: 1.1, marginTop: "-2rem" }}
+              className="text-white mb-2 drop-shadow-lg -mt-8 md:-mt-8"
+              style={{ fontSize: "clamp(42px, 8vw, 80px)", fontFamily: "'Playfair Display', serif", fontWeight: 900, lineHeight: 1.1 }}
             >
               176 Jahre
             </h1>
@@ -1647,6 +1796,53 @@ export function HomePage() {
                     <span style={{ fontSize: 10, lineHeight: 1.3 }} className="px-2 mt-1">{h.label}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* ── Flohmarkt-Anmeldung Mobile CTA ── */}
+              <div className="mt-8 mx-auto max-w-sm">
+                <div
+                  className="relative rounded-2xl p-4 overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(107,63,160,0.25) 0%, rgba(155,89,182,0.15) 50%, rgba(232,93,58,0.15) 100%)",
+                    border: "1px solid rgba(107,63,160,0.4)",
+                    boxShadow: "0 4px 30px rgba(107,63,160,0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+                  }}
+                >
+                  {/* Sparkle decorations */}
+                  <span className="absolute top-2 right-3" style={{ fontSize: 16, animation: "deco-twinkle 2s ease-in-out infinite", opacity: 0 }}>✨</span>
+                  <span className="absolute bottom-2 left-3" style={{ fontSize: 14, animation: "deco-twinkle 2s 0.7s ease-in-out infinite", opacity: 0 }}>🛍️</span>
+
+                  <div className="flex items-center gap-3">
+                    <div className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{
+                      background: "linear-gradient(135deg, #6b3fa0, #9b59b6)",
+                      boxShadow: "0 3px 12px rgba(107,63,160,0.5)",
+                    }}>
+                      <span style={{ fontSize: 22 }}>🛍️</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white" style={{ fontSize: 14, fontFamily: "'Fredoka', sans-serif" }}>
+                        Flohmarkt-Stand sichern!
+                      </p>
+                      <p className="text-white/50" style={{ fontSize: 11 }}>
+                        Sa. 13. Juni · Alte Turnhalle
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setFlohmarktModalOpen(true)}
+                    className="w-full mt-3 py-2.5 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    style={{
+                      background: "linear-gradient(135deg, #6b3fa0, #9b59b6, #e85d3a)",
+                      fontSize: 13,
+                      fontFamily: "'Fredoka', sans-serif",
+                      boxShadow: "0 4px 20px rgba(107,63,160,0.5), 0 0 25px rgba(232,93,58,0.2)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      animation: "floh-btn-pulse 2s ease-in-out infinite",
+                    }}
+                  >
+                    ✍️ Jetzt Stand anmelden!
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -1782,6 +1978,22 @@ export function HomePage() {
                                   </span>
                                 )}
                               </span>
+                              {event.titel.includes("Flohmarkt") && (
+                                <button
+                                  onClick={() => setFlohmarktModalOpen(true)}
+                                  className="ml-2 shrink-0 px-2.5 py-1 rounded-full text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                  style={{
+                                    background: "linear-gradient(135deg, #6b3fa0, #9b59b6)",
+                                    fontSize: "clamp(9px, 1.5vw, 11px)",
+                                    fontFamily: "'Fredoka', sans-serif",
+                                    boxShadow: "0 2px 10px rgba(107,63,160,0.4)",
+                                    border: "1px solid rgba(255,255,255,0.2)",
+                                    animation: "floh-btn-pulse 2s ease-in-out infinite",
+                                  }}
+                                >
+                                  ✍️ Anmelden
+                                </button>
+                              )}
                             </div>
                             {(event as any).sub && (
                               <p className="text-white/40 pl-[calc(80px+0.75rem)] whitespace-pre-line" style={{ fontSize: "clamp(11px, 2vw, 13px)" }}>
@@ -1928,6 +2140,7 @@ export function HomePage() {
         </div>
       </footer>
       <SponsorContactModal open={sponsorModalOpen} onClose={() => setSponsorModalOpen(false)} />
+      <FlohmarktAnmeldeModal open={flohmarktModalOpen} onClose={() => setFlohmarktModalOpen(false)} />
     </div>
   );
 }

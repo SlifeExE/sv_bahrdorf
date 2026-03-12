@@ -32,26 +32,27 @@ export function AGBPage() {
             lineHeight: 1.2,
           }}
         >
-          Allgemeine Geschäftsbedingungen &amp; Widerrufsbelehrung
+          Allgemeine Geschäftsbedingungen (AGB)
         </h1>
 
         <div
           className="space-y-8"
           style={{ fontFamily: "'Nunito', sans-serif", fontSize: 15, lineHeight: 1.8 }}
         >
-          {/* AGB */}
+          {/* 1. Geltungsbereich */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               1. Geltungsbereich
             </h2>
             <p className="text-white/70">
-              Diese Allgemeine Geschäftsbedingungen (AGB) gelten für sämtliche Bestellungen von Eintrittskarten über den Online-Ticketshop des Schützenvereins Bahrdorf 1850 e.V. für das Schützenfest Bahrdorf 2026.
+              Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für sämtliche Bestellungen von Eintrittskarten über den Online-Ticketshop des Schützenvereins Bahrdorf 1850 e.V. für das Schützenfest Bahrdorf 2026.
             </p>
             <p className="text-white/70 mt-3">
               Mit dem Erwerb eines Tickets erkennt der Käufer diese AGB an.
             </p>
           </section>
 
+          {/* 2. Veranstalter / Vertragspartner */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               2. Veranstalter / Vertragspartner
@@ -65,6 +66,7 @@ export function AGBPage() {
             </div>
           </section>
 
+          {/* 3. Vertragsschluss */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               3. Vertragsschluss
@@ -76,10 +78,11 @@ export function AGBPage() {
               Mit Abschluss des Bestellvorgangs gibt der Käufer ein verbindliches Angebot zum Kauf der ausgewählten Tickets ab.
             </p>
             <p className="text-white/70 mt-3">
-              Der Vertrag kommt zustande, sobald der Veranstalter die Bestellung durch eine Bestellbestätigung per E-Mail annimmt.
+              Der Vertrag kommt erst mit ausdrücklicher Annahme durch den Veranstalter zustande. Die Annahme erfolgt durch Versand der Bestellbestätigung oder durch Bereitstellung der Tickets per E-Mail.
             </p>
           </section>
 
+          {/* 4. Preise und Mehrwertsteuer */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               4. Preise und Mehrwertsteuer
@@ -92,16 +95,16 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 5. Zahlungsarten */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               5. Zahlungsarten
             </h2>
             <p className="text-white/70">
-              Die Bezahlung der Tickets erfolgt über die im Ticketshop angebotenen Zahlungsmethoden:
+              Die Bezahlung der Tickets erfolgt über folgende Zahlungsmethoden:
             </p>
             <ul className="text-white/70 mt-3 space-y-1 pl-5 list-disc">
-              <li>PayPal</li>
-              <li>Debit- oder Kreditkarte</li>
+              <li>PayPal (inkl. Zahlung per Kredit- oder Debitkarte über PayPal)</li>
               <li>Überweisung</li>
             </ul>
             <p className="text-white/70 mt-3">
@@ -109,12 +112,16 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 6. Zahlung per Überweisung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               6. Zahlung per Überweisung
             </h2>
             <p className="text-white/70">
               Bei Auswahl der Zahlungsart Überweisung verpflichtet sich der Käufer, den Rechnungsbetrag innerhalb von 7 Tagen nach Bestellung auf das angegebene Konto des Schützenvereins zu überweisen.
+            </p>
+            <p className="text-white/70 mt-3">
+              Maßgeblich ist der tatsächliche Zahlungseingang auf dem Konto des Veranstalters.
             </p>
             <p className="text-white/70 mt-3">
               Geht innerhalb dieser Frist kein Zahlungseingang ein, behält sich der Veranstalter vor, die Bestellung automatisch zu stornieren und die reservierten Tickets wieder freizugeben.
@@ -124,6 +131,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 7. Vorverkaufsfrist */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               7. Vorverkaufsfrist
@@ -139,6 +147,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 8. Ticketbereitstellung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               8. Ticketbereitstellung
@@ -147,13 +156,14 @@ export function AGBPage() {
               Die Tickets werden digital (z. B. als PDF oder QR-Code) per E-Mail bereitgestellt.
             </p>
             <p className="text-white/70 mt-3">
-              Bei PayPal, Debitkarte oder Kreditkarte erfolgt der Versand automatisch nach erfolgreicher Zahlung.
+              Bei Zahlung über PayPal erfolgt der Versand automatisch nach erfolgreicher Zahlung.
             </p>
             <p className="text-white/70 mt-3">
-              Bei Überweisung erfolgt der Versand erst nach Zahlungseingang und manueller Zahlungsprüfung.
+              Bei Zahlung per Überweisung erfolgt der Versand erst nach Zahlungseingang und manueller Zahlungsprüfung.
             </p>
           </section>
 
+          {/* 9. Gültigkeit der Tickets */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               9. Gültigkeit der Tickets
@@ -170,6 +180,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 10. Einlass und Ticketentwertung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               10. Einlass und Ticketentwertung
@@ -185,6 +196,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 11. Verlust von Tickets */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               11. Verlust von Tickets
@@ -197,6 +209,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 12. Weiterverkauf von Tickets */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               12. Weiterverkauf von Tickets
@@ -209,9 +222,10 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 13. Einlass und Verhalten auf dem Veranstaltungsgelände */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              13. Einlass und Hausrecht
+              13. Einlass und Verhalten auf dem Veranstaltungsgelände
             </h2>
             <p className="text-white/70">
               Der Veranstalter übt auf dem gesamten Veranstaltungsgelände das Hausrecht aus.
@@ -222,13 +236,14 @@ export function AGBPage() {
             <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
               <li>Verstößen gegen gesetzliche Vorschriften</li>
               <li>Gefährdung anderer Besucher</li>
-              <li>Verstößen gegen die Hausordnung</li>
+              <li>Nichtbefolgen von Anweisungen des Veranstalters oder des Sicherheitspersonals</li>
             </ul>
             <p className="text-white/70 mt-3">
               In diesen Fällen erfolgt keine Erstattung des Ticketpreises.
             </p>
           </section>
 
+          {/* 14. Absage oder Änderung der Veranstaltung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               14. Absage oder Änderung der Veranstaltung
@@ -241,15 +256,16 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 15. Stornierung und Ausschluss des Widerrufsrechts */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              15. Stornierung & Widerrufsbelehrung
+              15. Stornierung und Ausschluss des Widerrufsrechts
             </h2>
             <p className="text-white/70">
               Eine Stornierung oder Rückgabe von Tickets nach dem Kauf ist grundsätzlich ausgeschlossen, sofern die Veranstaltung planmäßig stattfindet.
             </p>
             <p className="text-white/70 mt-3">
-              Ein Widerrufsrecht besteht nicht, da es sich um einen Vertrag zur Erbringung von Dienstleistungen im Zusammenhang mit Freizeitbetätigungen handelt, der einen spezifischen Termin vorsieht. Dies gilt insbesondere für Veranstaltungstickets.
+              Ein Widerrufsrecht besteht nicht, da es sich um einen Vertrag zur Erbringung von Dienstleistungen im Zusammenhang mit Freizeitbetätigungen handelt, der einen spezifischen Termin vorsieht.
             </p>
             <p className="text-white/70 mt-3">
               Rechtsgrundlage: § 312g Abs. 2 Nr. 9 Bürgerliches Gesetzbuch (BGB)
@@ -259,6 +275,7 @@ export function AGBPage() {
             </p>
           </section>
 
+          {/* 16. Haftung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
               16. Haftung
@@ -271,7 +288,7 @@ export function AGBPage() {
               <li>aus vorsätzlicher oder grob fahrlässiger Pflichtverletzung</li>
             </ul>
             <p className="text-white/70 mt-3">
-              Für sonstige Schäden haftet der Veranstalter nur bei Verletzung wesentlicher Vertragspflichten.
+              Für sonstige Schäden haftet der Veranstalter nur bei vorsätzlicher oder grob fahrlässiger Pflichtverletzung sowie bei fahrlässiger Verletzung wesentlicher Vertragspflichten. In diesem Fall ist die Haftung auf den vertragstypischen, vorhersehbaren Schaden begrenzt.
             </p>
           </section>
 
