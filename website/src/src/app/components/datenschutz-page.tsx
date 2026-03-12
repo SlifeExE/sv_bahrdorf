@@ -49,10 +49,10 @@ export function DatenschutzPage() {
             </p>
             <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
               <p>Schützenverein Bahrdorf 1850 e.V.</p>
-              <p>vertreten durch den 1. Vorsitzenden</p>
-              <p>Frederic Broistedt</p>
-              <p className="mt-2">Helmstedter Straße 4</p>
+              <p>Helmstedter Straße 4</p>
               <p>38459 Bahrdorf</p>
+              <p className="mt-2">Vertreten durch den 1. Vorsitzenden</p>
+              <p>Frederic Broistedt</p>
               <p className="mt-2">E-Mail: <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a></p>
             </div>
           </section>
@@ -69,7 +69,7 @@ export function DatenschutzPage() {
               <p>Kamil Szuba – IT &amp; Digital Solutions</p>
             </div>
             <p className="text-white/70 mt-3">
-              Der technische Betreiber stellt die Infrastruktur für den Betrieb der Website und des Ticketshops bereit.
+              Der technische Betreiber stellt die Infrastruktur für den Betrieb der Website sowie des Ticketshops bereit.
             </p>
             <p className="text-white/70 mt-3">
               Die Verarbeitung erfolgt ausschließlich im Auftrag des Verantwortlichen gemäß Art. 28 DSGVO (Auftragsverarbeitung).
@@ -88,7 +88,7 @@ export function DatenschutzPage() {
               Beim Besuch unserer Website werden automatisch Informationen durch den Browser übermittelt und in sogenannten Server-Logfiles gespeichert.
             </p>
             <p className="text-white/70 mt-3">
-              Erfasst werden können:
+              Erfasst werden können insbesondere:
             </p>
             <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
               <li>Browsertyp und Browserversion</li>
@@ -102,7 +102,7 @@ export function DatenschutzPage() {
               Diese Daten dienen ausschließlich der technischen Überwachung, Sicherheit und Stabilität der Website.
             </p>
             <p className="text-white/70 mt-3">
-              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
             </p>
           </section>
 
@@ -130,14 +130,38 @@ export function DatenschutzPage() {
               Die Verarbeitung erfolgt zur Abwicklung des Ticketkaufs und zur Durchführung der Veranstaltung.
             </p>
             <p className="text-white/70 mt-3">
-              Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).
             </p>
           </section>
 
-          {/* 5. Zahlungsabwicklung */}
+          {/* 5. Ticketkontrolle am Veranstaltungseingang */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              5. Zahlungsabwicklung
+              5. Ticketkontrolle am Veranstaltungseingang
+            </h2>
+            <p className="text-white/70">
+              Beim Einlass zur Veranstaltung werden Tickets mittels eines QR-Codes durch mobile Endgeräte mit der Pretix-Scanner-App geprüft.
+            </p>
+            <p className="text-white/70 mt-3">
+              Dabei werden ausschließlich Ticketinformationen verarbeitet, insbesondere:
+            </p>
+            <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
+              <li>Ticket-ID bzw. QR-Code</li>
+              <li>Ticketstatus (gültig / bereits eingelöst)</li>
+              <li>ggf. der im Ticket hinterlegte Name</li>
+            </ul>
+            <p className="text-white/70 mt-3">
+              Die Verarbeitung erfolgt ausschließlich zum Zweck der Überprüfung der Ticketgültigkeit sowie zur Verhinderung einer mehrfachen Nutzung eines Tickets.
+            </p>
+            <p className="text-white/70 mt-3">
+              Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).
+            </p>
+          </section>
+
+          {/* 6. Zahlungsabwicklung */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              6. Zahlungsabwicklung
             </h2>
             <p className="text-white/70">
               Für die Zahlungsabwicklung nutzen wir folgende Zahlungsarten:
@@ -157,10 +181,38 @@ export function DatenschutzPage() {
             </p>
           </section>
 
-          {/* 6. Cookies */}
+          {/* 7. Kontaktformulare (Sponsoren / Flohmarktstände) */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              6. Cookies
+              7. Kontaktformulare (Sponsoren / Flohmarktstände)
+            </h2>
+            <p className="text-white/70">
+              Auf unserer Website stehen Kontaktformulare zur Verfügung, über die sich Interessenten als Sponsoren oder für einen Flohmarktstand anmelden können.
+            </p>
+            <p className="text-white/70 mt-3">
+              Wenn Sie uns über ein solches Formular kontaktieren, werden die von Ihnen eingegebenen Daten (z. B. Name, E-Mail-Adresse, Telefonnummer sowie weitere freiwillige Angaben) an die E-Mail-Adresse{" "}
+              <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a>{" "}
+              übermittelt und dort zur Bearbeitung der Anfrage gespeichert.
+            </p>
+            <p className="text-white/70 mt-3">
+              Die Verarbeitung dieser Daten erfolgt ausschließlich zum Zweck der Bearbeitung Ihrer Anfrage sowie zur Organisation der jeweiligen Veranstaltung.
+            </p>
+            <p className="text-white/70 mt-3">
+              Rechtsgrundlage der Verarbeitung ist:
+            </p>
+            <ul className="text-white/70 mt-2 space-y-1 pl-5 list-disc">
+              <li>Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen)</li>
+              <li>Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bearbeitung von Anfragen)</li>
+            </ul>
+            <p className="text-white/70 mt-3">
+              Die übermittelten Daten werden nur so lange gespeichert, wie dies zur Bearbeitung der Anfrage erforderlich ist, sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+            </p>
+          </section>
+
+          {/* 8. Cookies */}
+          <section>
+            <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
+              8. Cookies
             </h2>
             <p className="text-white/70">
               Unsere Website verwendet keine eigenen Tracking-Cookies.
@@ -169,14 +221,14 @@ export function DatenschutzPage() {
               Technisch notwendige Cookies können jedoch durch das Ticket-System Pretix gesetzt werden. Diese Cookies sind erforderlich, um die Funktion des Ticketshops sicherzustellen.
             </p>
             <p className="text-white/70 mt-3">
-              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO
+              Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
             </p>
           </section>
 
-          {/* 7. Eingebundene Dienste */}
+          {/* 9. Eingebundene Dienste */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              7. Eingebundene Dienste
+              9. Eingebundene Dienste
             </h2>
 
             <h3 className="text-white/90 mt-4 mb-2" style={{ fontSize: 15, fontFamily: "'Fredoka', sans-serif" }}>
@@ -212,10 +264,10 @@ export function DatenschutzPage() {
             </p>
           </section>
 
-          {/* 8. SSL- bzw. TLS-Verschlüsselung */}
+          {/* 10. SSL- bzw. TLS-Verschlüsselung */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              8. SSL- bzw. TLS-Verschlüsselung
+              10. SSL- bzw. TLS-Verschlüsselung
             </h2>
             <p className="text-white/70">
               Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL- bzw. TLS-Verschlüsselung.
@@ -225,10 +277,10 @@ export function DatenschutzPage() {
             </p>
           </section>
 
-          {/* 9. Speicherdauer */}
+          {/* 11. Speicherdauer */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              9. Speicherdauer
+              11. Speicherdauer
             </h2>
             <p className="text-white/70">
               Personenbezogene Daten werden nur so lange gespeichert, wie dies zur Erfüllung der jeweiligen Zwecke erforderlich ist.
@@ -238,39 +290,38 @@ export function DatenschutzPage() {
             </p>
           </section>
 
-          {/* 10. Ihre Rechte */}
+          {/* 12. Ihre Rechte */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              10. Ihre Rechte
+              12. Ihre Rechte
             </h2>
             <p className="text-white/70">
-              Sie haben gegenüber uns folgende Rechte:
+              Sie haben gegenüber uns folgende Rechte hinsichtlich Ihrer personenbezogenen Daten:
             </p>
             <ul className="text-white/70 mt-3 space-y-1 pl-5 list-disc">
-              <li>Auskunft (Art. 15 DSGVO)</li>
-              <li>Berichtigung (Art. 16 DSGVO)</li>
-              <li>Löschung (Art. 17 DSGVO)</li>
-              <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-              <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
-              <li>Widerspruch (Art. 21 DSGVO)</li>
+              <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
+              <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
+              <li>Recht auf Löschung (Art. 17 DSGVO)</li>
+              <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+              <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</li>
+              <li>Recht auf Widerspruch (Art. 21 DSGVO)</li>
             </ul>
             <p className="text-white/70 mt-3">
-              Zur Ausübung Ihrer Rechte können Sie sich jederzeit an{" "}
-              <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a>{" "}
-              wenden.
+              Zur Ausübung Ihrer Rechte können Sie sich jederzeit an folgende Adresse wenden:{" "}
+              <a href="mailto:info@svbahrdorf.de" className="text-accent hover:underline">info@svbahrdorf.de</a>
             </p>
           </section>
 
-          {/* 11. Beschwerderecht */}
+          {/* 13. Beschwerderecht */}
           <section>
             <h2 className="text-accent mb-4 tracking-wider uppercase" style={{ fontSize: 16, fontFamily: "'Fredoka', sans-serif" }}>
-              11. Beschwerderecht
+              13. Beschwerderecht
             </h2>
             <p className="text-white/70">
-              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
+              Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde über die Verarbeitung Ihrer personenbezogenen Daten zu beschweren.
             </p>
             <p className="text-white/70 mt-3">
-              Zuständige Behörde:
+              Zuständige Aufsichtsbehörde:
             </p>
             <div className="text-white/70 mt-2 pl-4" style={{ borderLeft: "2px solid rgba(45,139,111,0.5)" }}>
               <p>Die Landesbeauftragte für den Datenschutz Niedersachsen</p>
@@ -285,7 +336,7 @@ export function DatenschutzPage() {
           </section>
 
           <p className="text-white/40 mt-10" style={{ fontSize: 12 }}>
-            Stand: 11. März 2026
+            Stand: März 2026
           </p>
         </div>
       </main>

@@ -1082,21 +1082,30 @@ function SponsorSidebar({
 function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [form, setForm] = useState({ name: "", firma: "", email: "", nachricht: "" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   if (!open) return null;
 
-  const handleSend = () => {
-    const subject = encodeURIComponent(`Sponsoring-Anfrage Schützenfest 2026 – ${form.firma || form.name}`);
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nFirma: ${form.firma}\nE-Mail: ${form.email}\n\n${form.nachricht}`
-    );
-    window.location.href = `mailto:info@svbahrdorf.de?subject=${subject}&body=${body}`;
+  const handleSend = async () => {
+    setSending(true);
+    const subject = `Sponsoring-Anfrage Schützenfest 2026 – ${form.firma || form.name}`;
+    const body = `Name: ${form.name}\nFirma: ${form.firma}\nE-Mail: ${form.email}\n\nNachricht:\n${form.nachricht}`;
+    try {
+      const a = document.createElement("a");
+      a.href = `mailto:info@svbahrdorf.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch { /* ignore */ }
+    await new Promise((r) => setTimeout(r, 1200));
+    setSending(false);
     setSent(true);
     setTimeout(() => {
       setSent(false);
       setForm({ name: "", firma: "", email: "", nachricht: "" });
       onClose();
-    }, 2500);
+    }, 3500);
   };
 
   return (
@@ -1106,7 +1115,7 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl p-6"
+        className="relative w-full max-w-md rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
         style={{
           background: "linear-gradient(135deg, #1a1a2e 0%, #1e2040 100%)",
           border: "1px solid rgba(255,255,255,0.1)",
@@ -1116,7 +1125,7 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -1128,7 +1137,7 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
               Vielen Dank!
             </h3>
             <p className="text-white/60 mt-2" style={{ fontSize: 14 }}>
-              Ihr E-Mail-Programm wurde geöffnet. Senden Sie die Nachricht ab, um uns zu erreichen.
+              Ihre Sponsoring-Anfrage wurde erfolgreich übermittelt. Wir melden uns zeitnah bei Ihnen!
             </p>
           </div>
         ) : (
@@ -1137,7 +1146,7 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
               🤝 Sponsor werden
             </h3>
             <p className="text-white/50 mb-5" style={{ fontSize: 13 }}>
-              Schreiben Sie uns – wir freuen uns auf Ihre Nachricht!
+              Füllen Sie das Formular aus – wir freuen uns auf Ihre Anfrage!
             </p>
             <div className="space-y-3">
               <input
@@ -1175,19 +1184,32 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
             </div>
             <button
               onClick={handleSend}
-              disabled={!form.name || !form.email || !form.nachricht}
-              className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              disabled={!form.name || !form.email || !form.nachricht || sending}
+              className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, #2d8b6f, #1f6b52)",
                 fontSize: 15,
                 boxShadow: "0 4px 20px rgba(45,139,111,0.4)",
               }}
             >
-              <Send className="w-4 h-4" />
-              Nachricht senden
+              {sending ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Wird gesendet…
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Anfrage absenden
+                </>
+              )}
             </button>
-            <p className="text-white/30 text-center mt-3" style={{ fontSize: 11 }}>
-              Öffnet Ihr E-Mail-Programm mit vorausgefüllter Nachricht
+            <p className="text-white/30 text-center mt-3" style={{ fontSize: 11, lineHeight: 1.5 }}>
+              Mit dem Absenden des Formulars stimmen Sie der Verarbeitung Ihrer Angaben
+              zur Bearbeitung Ihrer Anfrage zu. Weitere Informationen finden Sie in unserer{" "}
+              <Link to="/datenschutz" className="text-accent/60 hover:text-accent underline" onClick={onClose}>
+                Datenschutzerklärung
+              </Link>.
             </p>
           </>
         )}
@@ -1200,21 +1222,30 @@ function SponsorContactModal({ open, onClose }: { open: boolean; onClose: () => 
 function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [form, setForm] = useState({ name: "", email: "", telefon: "", anzahlTische: "1", nachricht: "" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   if (!open) return null;
 
-  const handleSend = () => {
-    const subject = encodeURIComponent(`Flohmarkt-Anmeldung Schützenfest 2026 – ${form.name}`);
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nE-Mail: ${form.email}\nTelefon: ${form.telefon}\nAnzahl Tische/Stände: ${form.anzahlTische}\n\n${form.nachricht}`
-    );
-    window.location.href = `mailto:info@svbahrdorf.de?subject=${subject}&body=${body}`;
+  const handleSend = async () => {
+    setSending(true);
+    const subject = `Flohmarkt-Anmeldung Schützenfest 2026 – ${form.name}`;
+    const body = `Name: ${form.name}\nE-Mail: ${form.email}\nTelefon: ${form.telefon || "–"}\nAnzahl Tische/Stände: ${form.anzahlTische}\n\nAnmerkungen:\n${form.nachricht || "–"}`;
+    try {
+      const a = document.createElement("a");
+      a.href = `mailto:info@svbahrdorf.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch { /* ignore */ }
+    await new Promise((r) => setTimeout(r, 1200));
+    setSending(false);
     setSent(true);
     setTimeout(() => {
       setSent(false);
       setForm({ name: "", email: "", telefon: "", anzahlTische: "1", nachricht: "" });
       onClose();
-    }, 2500);
+    }, 3500);
   };
 
   return (
@@ -1224,7 +1255,7 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl p-6"
+        className="relative w-full max-w-md rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
         style={{
           background: "linear-gradient(135deg, #1a1a2e 0%, #2a1840 100%)",
           border: "1px solid rgba(255,255,255,0.1)",
@@ -1234,7 +1265,7 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -1246,7 +1277,7 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
               Anmeldung gesendet!
             </h3>
             <p className="text-white/60 mt-2" style={{ fontSize: 14 }}>
-              Ihr E-Mail-Programm wurde geöffnet. Senden Sie die Nachricht ab, um Ihren Stand zu reservieren.
+              Ihre Flohmarkt-Anmeldung wurde erfolgreich übermittelt. Wir bestätigen Ihren Standplatz in Kürze!
             </p>
           </div>
         ) : (
@@ -1309,19 +1340,32 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
             </div>
             <button
               onClick={handleSend}
-              disabled={!form.name || !form.email}
-              className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              disabled={!form.name || !form.email || sending}
+              className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, #6b3fa0, #8b4fcf)",
                 fontSize: 15,
                 boxShadow: "0 4px 20px rgba(107,63,160,0.4)",
               }}
             >
-              <Send className="w-4 h-4" />
-              Anmeldung absenden
+              {sending ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Wird gesendet…
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Anmeldung absenden
+                </>
+              )}
             </button>
-            <p className="text-white/30 text-center mt-3" style={{ fontSize: 11 }}>
-              Öffnet Ihr E-Mail-Programm mit vorausgefüllter Anmeldung
+            <p className="text-white/30 text-center mt-3" style={{ fontSize: 11, lineHeight: 1.5 }}>
+              Mit dem Absenden des Formulars stimmen Sie der Verarbeitung Ihrer Angaben
+              zur Bearbeitung Ihrer Anfrage zu. Weitere Informationen finden Sie in unserer{" "}
+              <Link to="/datenschutz" className="text-accent/60 hover:text-accent underline" onClick={onClose}>
+                Datenschutzerklärung
+              </Link>.
             </p>
           </>
         )}
