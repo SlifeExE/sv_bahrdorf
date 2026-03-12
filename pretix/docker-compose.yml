@@ -36,6 +36,8 @@ services:
     depends_on:
       - db
       - redis
+    environment:
+      MAX_WORKERS: "8"
     volumes:
       - ./config/pretix.cfg:/etc/pretix/pretix.cfg
       - ./data/pretix:/data
