@@ -37,7 +37,7 @@ services:
       - db
       - redis
     environment:
-      MAX_WORKERS: "8"
+      NUM_WORKERS: "8"
     volumes:
       - ./config/pretix.cfg:/etc/pretix/pretix.cfg
       - ./data/pretix:/data
