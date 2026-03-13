@@ -184,7 +184,7 @@ else
     echo "✗ Website health check failed!"
 fi
 
-if curl -sf http://127.0.0.1:7091/svbahrdorf/tickets/ -o /dev/null; then
+if curl -sf -H "Host: tickets.svbahrdorf.de" http://127.0.0.1:7091/svbahrdorf/tickets/ -o /dev/null; then
     echo "✓ Pretix is live!"
 else
     echo "✗ Pretix health check failed!"
