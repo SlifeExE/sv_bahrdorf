@@ -126,12 +126,26 @@ fi
 
 echo "✓ pretix.cfg patched"
 
-echo "Preparing Pretix data directory..."
+echo "Preparing Pretix and PostgreSQL data directories..."
 
+PRETIX_DB_DIR="/opt/sv_bahrdorf/pretix/data/db"
 PRETIX_DATA_DIR="/opt/sv_bahrdorf/pretix/data/pretix"
 PRETIX_LOG_DIR="${PRETIX_DATA_DIR}/logs"
 
+# Ensure directories exist
+sudo mkdir -p "$PRETIX_DB_DIR"
 mkdir -p "$PRETIX_LOG_DIR"
+
+# PostgreSQL volume must belong to postgres user in container
+sudo chown -R 999:999 "$PRETIX_DB_DIR"
+sudo chmod 700 "$PRETIX_DB_DIR"
+sudo find "$PRETIX_DB_DIR" -type d -exec chmod 700 {} \;
+sudo find "$PRETIX_DB_DIR" -type f -exec chmod 600 {} \;
+
+# Pretix data stays owned by admin on host
+sudo chown -R admin:admin "$PRETIX_DATA_DIR"
+chmod 755 "$PRETIX_DATA_DIR"
+chmod 777 "$PRETIX_LOG_DIR"
 
 # Write Pretix secret file from .env
 printf '%s\n' "$PRETIX_SECRET_KEY" > "${PRETIX_DATA_DIR}/.secret"
@@ -140,18 +154,18 @@ printf '%s\n' "$PRETIX_SECRET_KEY" > "${PRETIX_DATA_DIR}/.secret"
 touch "${PRETIX_LOG_DIR}/pretix.log"
 touch "${PRETIX_LOG_DIR}/csp.log"
 
-# Keep host ownership as admin, but allow container user to read/write what is needed
-chmod 755 "$PRETIX_DATA_DIR"
-chmod 777 "$PRETIX_LOG_DIR"
+# Permissions so container user can read/write
 chmod 644 "${PRETIX_DATA_DIR}/.secret"
 chmod 666 "${PRETIX_LOG_DIR}/pretix.log"
 chmod 666 "${PRETIX_LOG_DIR}/csp.log"
 
-echo "✓ Pretix data prepared"
+echo "✓ Pretix and PostgreSQL data prepared"
 
 echo "Deploying Pretix..."
 cd /opt/sv_bahrdorf/pretix
 docker compose --env-file /opt/sv_bahrdorf/pretix/secrets/.env up -d --build
+docker restart sv_bahrdorf_pretix_db
+docker restart sv_bahrdorf_pretix_redis
 docker restart sv_bahrdorf_pretix
 echo "✓ Pretix deployed"
 
@@ -175,3 +189,9 @@ if curl -sf http://127.0.0.1:7091/svbahrdorf/tickets/ -o /dev/null; then
 else
     echo "✗ Pretix health check failed!"
 fi
+
+echo "Recent Pretix logs:"
+docker logs --tail 40 sv_bahrdorf_pretix || true
+
+echo "Recent PostgreSQL logs:"
+docker logs --tail 20 sv_bahrdorf_pretix_db || true
