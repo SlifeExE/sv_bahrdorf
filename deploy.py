@@ -44,20 +44,26 @@ PRETIX_LOG_DIR = PRETIX_DATA_DIR / "logs"
 WEBSITE_SRC = BASE_DIR / "website/src/src"
 
 
-def run_command(cmd: list[str], cwd: Optional[Path] = None, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: list[str], cwd: Optional[Path] = None, check: bool = True, interactive: bool = False) -> subprocess.CompletedProcess:
     """Run a shell command and return the result."""
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=cwd,
-            capture_output=True,
-            text=True,
-            check=check
-        )
-        return result
+        if interactive:
+            # For sudo and other interactive commands - don't capture output
+            result = subprocess.run(cmd, cwd=cwd, check=check)
+            return result
+        else:
+            result = subprocess.run(
+                cmd,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                check=check
+            )
+            return result
     except subprocess.CalledProcessError as e:
         console.print(f"[red]✗[/red] Command failed: {' '.join(cmd)}")
-        console.print(f"[dim]{e.stderr}[/dim]")
+        if hasattr(e, 'stderr') and e.stderr:
+            console.print(f"[dim]{e.stderr}[/dim]")
         if check:
             raise
         return e
@@ -191,34 +197,34 @@ def deploy() -> None:
     console.print("[green]✓[/green] Configuration patched")
     
     # Step 6: Prepare directories
-    with console.status("[cyan]Preparing data directories...", spinner="dots"):
-        # Create directories
-        PRETIX_DB_DIR.mkdir(parents=True, exist_ok=True)
-        PRETIX_LOG_DIR.mkdir(parents=True, exist_ok=True)
-        
-        # PostgreSQL permissions (user 999 in container)
-        run_command(["sudo", "chown", "-R", "999:999", str(PRETIX_DB_DIR)])
-        run_command(["sudo", "chmod", "700", str(PRETIX_DB_DIR)])
-        run_command(["sudo", "find", str(PRETIX_DB_DIR), "-type", "d", "-exec", "chmod", "700", "{}", "+"])
-        run_command(["sudo", "find", str(PRETIX_DB_DIR), "-type", "f", "-exec", "chmod", "600", "{}", "+"])
-        
-        # Pretix data permissions
-        run_command(["sudo", "chown", "-R", "admin:admin", str(PRETIX_DATA_DIR)])
-        PRETIX_DATA_DIR.chmod(0o755)
-        PRETIX_LOG_DIR.chmod(0o777)
-        
-        # Write secret file
-        secret_file = PRETIX_DATA_DIR / ".secret"
-        secret_file.write_text(secret_key + "\n")
-        secret_file.chmod(0o644)
-        
-        # Create log files
-        pretix_log = PRETIX_LOG_DIR / "pretix.log"
-        csp_log = PRETIX_LOG_DIR / "csp.log"
-        pretix_log.touch()
-        csp_log.touch()
-        pretix_log.chmod(0o666)
-        csp_log.chmod(0o666)
+    console.print("[cyan]→[/cyan] Preparing data directories...")
+    
+    # Create directories
+    PRETIX_DB_DIR.mkdir(parents=True, exist_ok=True)
+    PRETIX_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # PostgreSQL permissions (user 999 in container)
+    # sudo commands run interactively so password prompt is visible
+    run_command(["sudo", "chown", "999:999", str(PRETIX_DB_DIR)], check=False, interactive=True)
+    run_command(["sudo", "chmod", "700", str(PRETIX_DB_DIR)], check=False, interactive=True)
+    
+    # Pretix data permissions - only parent directory
+    run_command(["sudo", "chown", "admin:admin", str(PRETIX_DATA_DIR)], check=False, interactive=True)
+    PRETIX_DATA_DIR.chmod(0o755)
+    PRETIX_LOG_DIR.chmod(0o777)
+    
+    # Write secret file
+    secret_file = PRETIX_DATA_DIR / ".secret"
+    secret_file.write_text(secret_key + "\n")
+    secret_file.chmod(0o644)
+    
+    # Create log files
+    pretix_log = PRETIX_LOG_DIR / "pretix.log"
+    csp_log = PRETIX_LOG_DIR / "csp.log"
+    pretix_log.touch()
+    csp_log.touch()
+    pretix_log.chmod(0o666)
+    csp_log.chmod(0o666)
     
     console.print("[green]✓[/green] Data directories prepared")
     
