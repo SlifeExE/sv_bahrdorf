@@ -1,26 +1,26 @@
 services:
   db:
-    image: postgres:15
     container_name: sv_bahrdorf_pretix_db
+    image: postgres:15
     restart: unless-stopped
     environment:
       POSTGRES_DB: pretix
       POSTGRES_USER: pretix
       POSTGRES_PASSWORD: ${PRETIX_DB_PASSWORD}
+    ports:
+      - "25432:5432"
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - /opt/sv_bahrdorf/pretix/data/db:/var/lib/postgresql/data
     networks:
       - pretix_net
     logging:
       options:
         max-size: "10m"
         max-file: "3"
-    ports:
-      - "25432:5432"
 
   redis:
-    image: redis:7-alpine
     container_name: sv_bahrdorf_pretix_redis
+    image: redis:7-alpine
     restart: unless-stopped
     networks:
       - pretix_net
@@ -30,20 +30,22 @@ services:
         max-file: "3"
 
   pretix:
-    image: pretix/standalone:stable
     container_name: sv_bahrdorf_pretix
+    image: pretix/standalone:stable
     restart: unless-stopped
     depends_on:
       - db
       - redis
+    env_file:
+      - /opt/sv_bahrdorf/pretix/secrets/.env
     environment:
       NUM_WORKERS: "8"
-    volumes:
-      - ./config/pretix.cfg:/etc/pretix/pretix.cfg
-      - ./data/pretix:/data
-      - ./production_settings.py:/pretix/src/production_settings.py
     ports:
       - "127.0.0.1:7091:80"
+    volumes:
+      - /opt/sv_bahrdorf/pretix/config/pretix.cfg:/etc/pretix/pretix.cfg:ro
+      - /opt/sv_bahrdorf/pretix/data/pretix:/data
+      - /opt/sv_bahrdorf/pretix/production_settings.py:/pretix/src/production_settings.py:ro
     networks:
       - pretix_net
     logging:
