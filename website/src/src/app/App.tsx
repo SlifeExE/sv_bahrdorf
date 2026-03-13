@@ -9,6 +9,7 @@ import { DiscoBall } from "./components/disco-ball";
 import { TicketButton } from "./components/ticket-button";
 import { TicketShop } from "./components/ticket-shop";
 import { PennantsOverlay } from "./components/pennants";
+import { CookieBanner } from "./components/cookie-banner";
 
 const fireworksImg = "https://images.unsplash.com/photo-1657032178129-fedec8a0947a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaXJld29ya3MlMjBuaWdodCUyMGNlbGVicmF0aW9ufGVufDF8fHx8MTc3MjU3NTY2NHww&ixlib=rb-4.1.0&q=80&w=1080";
 import autoscooterImg from "figma:asset/d301daf9d2eabbc76292ef3859a540092ad41a54.png";
@@ -2189,16 +2190,11 @@ export function HomePage() {
   );
 }
 
-/* ══════════ ROUTER ══════════ */
+/* ══════════ LAYOUT ══════════ */
 
-const router = createBrowserRouter([
-  { path: "/", Component: HomePage },
-  { path: "/tickets", Component: TicketShop },
-  { path: "/agb", Component: AGBPage },
-  { path: "/datenschutz", Component: DatenschutzPage },
-]);
+import { Outlet } from "react-router";
 
-export default function App() {
+function RootLayout() {
   useEffect(() => {
     // Pretix Widget Scripts vorladen
     if (!document.getElementById("pretix-widget-css")) {
@@ -2220,5 +2216,29 @@ export default function App() {
     }
   }, []);
 
+  return (
+    <>
+      <Outlet />
+      <CookieBanner />
+    </>
+  );
+}
+
+/* ══════════ ROUTER ══════════ */
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    Component: RootLayout,
+    children: [
+      { index: true, Component: HomePage },
+      { path: "tickets", Component: TicketShop },
+      { path: "agb", Component: AGBPage },
+      { path: "datenschutz", Component: DatenschutzPage },
+    ],
+  },
+]);
+
+export default function App() {
   return <RouterProvider router={router} />;
 }
