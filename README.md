@@ -13,7 +13,8 @@ sv_bahrdorf/
 │   ├── docker-compose.yml
 │   ├── config/pretix.cfg
 │   └── data/                       # Persistente Daten (nicht im Repo)
-├── deploy.sh                       # Deploy-Script
+├── deploy.py                       # Deploy-Script (Python mit Rich)
+├── requirements.txt                # Python-Dependencies
 └── Makefile                        # Docker-Shortcuts
 ```
 
@@ -28,13 +29,33 @@ sv_bahrdorf/
 
 ## Deployment
 
-### Website
+### Installation
+Installiere zunächst die Python-Dependencies:
 ```bash
-./deploy.sh
+pip install -r requirements.txt
 ```
+
+### Deployment ausführen
+```bash
+# Mit Python direkt
+python3 deploy.py
+
+# Oder mit Make
+make deploy
+```
+
+Das Deploy-Script führt automatisch folgende Schritte aus:
+- Git Pull (latest changes)
+- Secrets aus `.env` laden
+- Figma-Imports patchen
+- Pretix-Konfiguration aktualisieren
+- Verzeichnisse und Berechtigungen setzen
+- Docker Container bauen und starten
+- Health-Checks durchführen
 
 ### Makefile Shortcuts
 ```bash
+make deploy       # Full Deployment
 make prod-up      # Build & Start
 make prod-down    # Stop
 make status       # Container-Status
