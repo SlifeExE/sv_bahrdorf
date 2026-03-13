@@ -6,7 +6,7 @@ export function TicketButton() {
 
   return (
     <Link
-      to="/tickets"
+      to="/vorverkauf"
       className="inline-block mt-5 no-underline group"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

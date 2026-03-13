@@ -8,6 +8,7 @@ import { DatenschutzPage } from "./components/datenschutz-page";
 import { DiscoBall } from "./components/disco-ball";
 import { TicketButton } from "./components/ticket-button";
 import { TicketShop } from "./components/ticket-shop";
+import { TicketCountdown } from "./components/ticket-countdown";
 import { PennantsOverlay } from "./components/pennants";
 import { CookieBanner } from "./components/cookie-banner";
 
@@ -1278,7 +1279,7 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
               Anmeldung gesendet!
             </h3>
             <p className="text-white/60 mt-2" style={{ fontSize: 14 }}>
-              Ihre Flohmarkt-Anmeldung wurde erfolgreich übermittelt. Wir bestätigen Ihren Standplatz in Kürze!
+              Ihre Anmeldung wurde erfolgreich übermittelt. Wir prüfen die Verfügbarkeit und melden uns zeitnah bei Ihnen!
             </p>
           </div>
         ) : (
@@ -1289,9 +1290,14 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
             <p className="text-white/50 mb-1" style={{ fontSize: 13 }}>
               Samstag, 13. Juni 2026 · Alte Turnhalle
             </p>
-            <p className="text-white/40 mb-5" style={{ fontSize: 12 }}>
+            <p className="text-white/40 mb-3" style={{ fontSize: 12 }}>
               Melden Sie sich jetzt an und sichern Sie sich Ihren Standplatz!
             </p>
+            <div className="mb-5 px-3 py-2.5 rounded-lg" style={{ background: "rgba(45,139,111,0.12)", border: "1px solid rgba(45,139,111,0.25)" }}>
+              <p className="text-white/60" style={{ fontSize: 11, lineHeight: 1.6 }}>
+                📋 Die Standplätze sind begrenzt – eine Zuteilung kann leider nicht garantiert werden. Wir melden uns zeitnah bei Ihnen zurück.
+              </p>
+            </div>
             <div className="space-y-3">
               <input
                 type="text"
@@ -1344,9 +1350,9 @@ function FlohmarktAnmeldeModal({ open, onClose }: { open: boolean; onClose: () =
               disabled={!form.name || !form.email || sending}
               className="w-full mt-4 py-3 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
               style={{
-                background: "linear-gradient(135deg, #6b3fa0, #8b4fcf)",
+                background: "linear-gradient(135deg, #2d8b6f, #1a7a5a)",
                 fontSize: 15,
-                boxShadow: "0 4px 20px rgba(107,63,160,0.4)",
+                boxShadow: "0 4px 20px rgba(45,139,111,0.4)",
               }}
             >
               {sending ? (
@@ -1410,7 +1416,7 @@ export function HomePage() {
           {/* Desktop Nav Links */}
           <div className="hidden md:flex gap-8" style={{ fontSize: 14 }}>
             <a href="#programm" onClick={scrollTo("programm")} className="text-white/80 hover:text-accent transition-colors">Programm</a>
-            <Link to="/tickets" className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
+            <Link to="/vorverkauf" className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
             <a href="#highlights" onClick={scrollTo("highlights")} className="text-white/80 hover:text-accent transition-colors">Highlights</a>
             <a href="#sponsoren" onClick={scrollTo("sponsoren")} className="text-white/80 hover:text-accent transition-colors">Sponsoren</a>
             <a href="#kontakt" onClick={scrollTo("kontakt")} className="text-white/80 hover:text-accent transition-colors">Kontakt</a>
@@ -1430,7 +1436,7 @@ export function HomePage() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-white/10 px-6 py-4 flex flex-col gap-4" style={{ fontSize: 15, background: "rgba(26,26,46,0.95)" }}>
             <a href="#programm" onClick={(e) => { scrollTo("programm")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Programm</a>
-            <Link to="/tickets" onClick={() => setMobileMenuOpen(false)} className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
+            <Link to="/vorverkauf" onClick={() => setMobileMenuOpen(false)} className="text-white/80 hover:text-accent transition-colors">Tickets</Link>
             <a href="#highlights" onClick={(e) => { scrollTo("highlights")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Highlights</a>
             <a href="#sponsoren" onClick={(e) => { scrollTo("sponsoren")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Sponsoren</a>
             <a href="#kontakt" onClick={(e) => { scrollTo("kontakt")(e); setMobileMenuOpen(false); }} className="text-white/80 hover:text-accent transition-colors">Kontakt</a>
@@ -1530,62 +1536,103 @@ export function HomePage() {
 
             {/* ── Flohmarkt ── */}
             <div
-              className="flex absolute flex-col items-center z-20 pointer-events-auto"
-              style={{ top: "52%", left: "6%", animation: "float-bob 4.5s ease-in-out infinite" }}
+              className="flex absolute items-center z-20 pointer-events-auto"
+              style={{ top: "52%", left: "2%", animation: "float-bob 4.5s ease-in-out infinite" }}
             >
-              <div className="relative" style={{ width: 130, height: 130 }}>
-                <div className="absolute inset-0 rounded-2xl opacity-50" style={{
-                  background: "radial-gradient(circle, rgba(107,63,160,0.5) 0%, transparent 70%)",
-                  filter: "blur(16px)",
-                  transform: "scale(1.4)",
-                }} />
-                <img
-                  src={flohmarktImg}
-                  alt="Flohmarkt"
-                  className="relative w-full h-full object-contain drop-shadow-lg"
-                  style={{ filter: "drop-shadow(0 4px 12px rgba(107,63,160,0.5))" }}
-                />
+              {/* Flohmarkt-Logo + Label (links) */}
+              <div className="flex flex-col items-center">
+                <div className="relative" style={{ width: 130, height: 130 }}>
+                  <div className="absolute inset-0 rounded-2xl opacity-50" style={{
+                    background: "radial-gradient(circle, rgba(107,63,160,0.5) 0%, transparent 70%)",
+                    filter: "blur(16px)",
+                    transform: "scale(1.4)",
+                  }} />
+                  <img
+                    src={flohmarktImg}
+                    alt="Flohmarkt"
+                    className="relative w-full h-full object-contain drop-shadow-lg"
+                    style={{ filter: "drop-shadow(0 4px 12px rgba(107,63,160,0.5))" }}
+                  />
+                </div>
+                <p
+                  className="text-white whitespace-nowrap drop-shadow-lg mt-1"
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "'Fredoka', sans-serif",
+                    textShadow: "0 2px 12px rgba(107,63,160,0.8), 0 0 30px rgba(107,63,160,0.4)",
+                  }}
+                >
+                  Flohmarkt
+                </p>
               </div>
-              <p
-                className="text-white whitespace-nowrap drop-shadow-lg mt-1"
-                style={{
-                  fontSize: 14,
-                  fontFamily: "'Fredoka', sans-serif",
-                  textShadow: "0 2px 12px rgba(107,63,160,0.8), 0 0 30px rgba(107,63,160,0.4)",
-                }}
-              >
-                Flohmarkt
-              </p>
+
+              {/* Pfeil-Button + Text (rechts vom Logo, Pfeil zeigt nach links) */}
               <button
                 onClick={() => setFlohmarktModalOpen(true)}
-                className="relative mt-2 px-4 py-2 rounded-full text-white flex items-center gap-2 transition-all hover:scale-110 hover:shadow-xl cursor-pointer"
+                className="relative flex items-center gap-3 transition-all hover:scale-105 cursor-pointer group ml-3"
                 style={{
-                  background: "linear-gradient(135deg, #6b3fa0, #9b59b6, #e85d3a)",
-                  fontSize: 12,
-                  fontFamily: "'Fredoka', sans-serif",
-                  boxShadow: "0 3px 20px rgba(107,63,160,0.6), 0 0 30px rgba(232,93,58,0.3)",
-                  animation: "floh-btn-pulse 2s ease-in-out infinite, floh-btn-wiggle 3s 1s ease-in-out infinite",
-                  border: "2px solid rgba(255,255,255,0.35)",
+                  animation: "floh-btn-wiggle 3s 1s ease-in-out infinite",
                 }}
               >
-                <span className="absolute inset-0 rounded-full" style={{
-                  background: "linear-gradient(135deg, rgba(107,63,160,0.4), rgba(232,93,58,0.4))",
-                  filter: "blur(8px)",
-                  transform: "scale(1.3)",
-                  animation: "floh-btn-pulse 2s ease-in-out infinite",
-                }} />
-                <span className="relative flex items-center gap-1.5">
-                  <span>✍️</span> Stand anmelden!
-                </span>
-                <span className="absolute -top-2.5 -right-2.5 px-1.5 py-0.5 rounded-full text-white" style={{
-                  background: "linear-gradient(135deg, #e85d3a, #c41e3a)",
-                  fontSize: 8,
-                  fontFamily: "'Fredoka', sans-serif",
-                  boxShadow: "0 2px 8px rgba(232,93,58,0.6)",
-                  animation: "floh-badge-bounce 1.5s ease-in-out infinite",
-                }}>
-                  Jetzt!
-                </span>
+                {/* Animierter Pfeil-Kreis ← zeigt auf Logo */}
+                <div
+                  className="relative flex items-center justify-center rounded-full shrink-0"
+                  style={{
+                    width: 46,
+                    height: 46,
+                    background: "linear-gradient(135deg, #2d8b6f, #1a7a5a)",
+                    border: "2px solid rgba(255,255,255,0.5)",
+                    boxShadow: "0 3px 20px rgba(45,139,111,0.6), 0 0 30px rgba(26,122,90,0.3)",
+                    animation: "floh-btn-pulse 2s ease-in-out infinite",
+                  }}
+                >
+                  <span className="absolute inset-0 rounded-full" style={{
+                    background: "linear-gradient(135deg, rgba(107,63,160,0.3), rgba(232,93,58,0.3))",
+                    filter: "blur(8px)",
+                    transform: "scale(1.4)",
+                    animation: "floh-btn-pulse 2s ease-in-out infinite",
+                  }} />
+                  {/* Pfeil zeigt nach LINKS auf das Flohmarkt-Logo */}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="relative z-10 transition-transform group-hover:-translate-x-0.5"
+                    style={{ width: 22, height: 22 }}
+                  >
+                    <path d="M19 12H5M11 19l-7-7 7-7" />
+                  </svg>
+
+                </div>
+                {/* Text-Block */}
+                <div className="flex flex-col items-start">
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      fontSize: 18,
+                      fontFamily: "'Fredoka', sans-serif",
+                      color: "#fff",
+                      textShadow: "0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.7), 0 0 25px rgba(0,0,0,0.4)",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    Stand anmelden!
+                  </span>
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      fontSize: 11,
+                      fontFamily: "'Nunito', sans-serif",
+                      color: "rgba(255,255,255,0.85)",
+                      textShadow: "0 1px 4px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    Sa. 13.09. · Alte Turnhalle
+                  </span>
+                </div>
               </button>
             </div>
 
@@ -1877,10 +1924,10 @@ export function HomePage() {
                     onClick={() => setFlohmarktModalOpen(true)}
                     className="w-full mt-3 py-2.5 rounded-full text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
                     style={{
-                      background: "linear-gradient(135deg, #6b3fa0, #9b59b6, #e85d3a)",
+                      background: "linear-gradient(135deg, #2d8b6f, #1a7a5a, #247a5a)",
                       fontSize: 13,
                       fontFamily: "'Fredoka', sans-serif",
-                      boxShadow: "0 4px 20px rgba(107,63,160,0.5), 0 0 25px rgba(232,93,58,0.2)",
+                      boxShadow: "0 4px 20px rgba(45,139,111,0.5), 0 0 25px rgba(26,122,90,0.2)",
                       border: "1px solid rgba(255,255,255,0.2)",
                       animation: "floh-btn-pulse 2s ease-in-out infinite",
                     }}
@@ -2232,6 +2279,7 @@ const router = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, Component: HomePage },
+      { path: "vorverkauf", Component: TicketCountdown },
       { path: "tickets", Component: TicketShop },
       { path: "agb", Component: AGBPage },
       { path: "datenschutz", Component: DatenschutzPage },
